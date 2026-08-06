@@ -91,6 +91,8 @@ skills/
   cloudcannon-visual-editing/       # Visual editing skill (standalone)
   brainstorming/                    # Design exploration skill
   make-site-multilingual/           # Rosey + RCC setup (standalone, outside the migration phases)
+    tagging.md                      # Phase 3 in full — data-rosey authoring rules
+    troubleshooting.md              # Symptom-driven diagnosis
   translate-multilingual/           # AI translation of locale files and content (standalone)
 ```
 

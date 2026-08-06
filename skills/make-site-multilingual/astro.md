@@ -1,20 +1,33 @@
 # Astro-Specific Patterns
 
-Framework-specific implementation details for making an Astro site multilingual with Rosey/RCC/CloudCannon. Read alongside the main `SKILL.md` workflow. The last section covers **migrating an Astro site off its existing i18n system** (Appendix A of the main skill).
+Framework-specific implementation details for making an Astro site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](SKILL.md) workflow and [`tagging.md`](tagging.md). The last section covers **migrating an Astro site off its existing i18n system** (Appendix A of the main skill).
 
-## Slug Derivation
+## Root Derivation
 
-Use `Astro.url.pathname` directly in the component that renders `<main>`:
+For a route that maps one-to-one to a URL, `Astro.url.pathname` in the component that renders `<main>` avoids threading a slug prop through the layout chain:
 
 ```astro
 <main data-rosey-root={Astro.url.pathname.replace(/^\/|\/$/g, '') || 'index'}>
 ```
 
-Works for any page type and avoids threading a slug prop through the layout chain.
+**MUST NOT use it on a route where one template serves many URLs.** Paginated routes (`[...page].astro`) and taxonomy routes are the common cases: `/blog/` derives `blog` while `/blog/2/` derives `blog/2`, so page 2 mints a duplicate, untranslated copy of every key on it — and the default-language site renders perfectly. See [tagging.md § 3e](tagging.md#3e-derive-the-root-from-the-templates-source-identity).
+
+Take an explicit `roseyRoot` prop on the layout and pass it from those routes:
+
+```astro
+<main data-rosey-root={roseyRoot ?? Astro.url.pathname.replace(/^\/|\/$/g, '') || 'index'}>
+```
+
+| Route shape                                  | Root                                                                              |
+| -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `about.astro`, `[...slug].astro`             | Derived from `Astro.url.pathname`                                                 |
+| `blog/[...page].astro` (paginated listing)   | Explicit `roseyRoot="blog"` — every page shares it                                |
+| `[locale]/tags/[tag]/[...page].astro`        | Explicit `roseyRoot="tags"` (see [Taxonomy routes](#taxonomy-routes-3i-in-astro)) |
+| `[locale]/blog/[...slug].astro` (split post) | Explicit `roseyRoot` stripping the locale prefix                                  |
 
 ## Content-Block Namespacing — put rosey attributes _inside_ the item component
 
-> This implements the core rule from §3g of the main skill. On Astro sites it is the **default** pattern for any array/repeater rendered in a loop — not an edge-case fix.
+> This implements the core rule from [§3g](tagging.md#3g-namespacing-arrays-and-page-builder-blocks). On Astro sites it is the **default** pattern for any array/repeater rendered in a loop — not an edge-case fix.
 
 For CMS page-builder pages using `content_blocks` (or any looped array — testimonials, team members, FAQ entries), use the item's `_uuid` field (populated by CloudCannon's `instance_value: UUID`) as the namespace segment, and place that namespace on **the item component's own root**, not on the `.map()` wrapper in the parent.
 
@@ -56,7 +69,9 @@ The same principle applies to a top-level `content_blocks` loop, where each bloc
 <!-- key: index:3f43d721-...:heading -->
 ```
 
-This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every structure value — see §3g of the main skill. Existing content files need UUIDs seeded manually. For a working example, see the [Rosey Astro Starter](https://github.com/CloudCannon/rosey-astro-starter) (`Page.astro` and `cloudcannon.config.yml`).
+This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every structure value — see [§3g](tagging.md#stable-namespace-values-uuids-cloudcannon-sites-rcc-layer). Existing content files need a **seeding pass**, including structure defaults and `src/data/*.json` — follow the procedure in [§3g](tagging.md#seeding-_uuid-into-existing-content-rcc-layer) rather than hand-editing, and grep the built output for `data-rosey-ns="undefined"` afterwards. For a working example, see the [Rosey Astro Starter](https://github.com/CloudCannon/rosey-astro-starter) (`Page.astro` and `cloudcannon.config.yml`).
+
+**Structural wrappers get no namespace.** A grid cell, column, slide, or tab panel that only positions its children MUST NOT carry `data-rosey-ns` — destructure `_uuid` so it doesn't reach the DOM, but don't use it. Otherwise dragging a block between columns re-keys every string inside it ([§3g](tagging.md#rule-the-namespace-goes-on-the-component-that-renders-its-own-text)).
 
 **Fallback (non-CloudCannon):** if `instance_value` isn't available, use `data-rosey-ns={`${block._name}-${i}`}` — but this is fragile, reordering shifts keys, and you lose the clone-safety above.
 
@@ -64,12 +79,31 @@ This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every 
 
 For component-heavy Astro sites where building blocks already use `data-prop` for CloudCannon inline editing, auto-derive `data-rosey` from that attribute:
 
+**MUST sanitise `.` to `_` in the derived key.** Nested props (`price.prefix`, `table.sections.0.rows.1.cells.2`) otherwise produce dotted keys, and **a dotted key renders correctly on the translated site while silently dropping every Visual Editor save** — the connector writes with `slug: "<key>.value"`, so the dot resolves to a nested path that doesn't exist. There is no error. See [§3f](tagging.md#sanitise-dots-out-of-derived-keys-rcc-layer).
+
+Put the derivation in one helper so no call site can skip it:
+
+```ts
+// src/utils/roseyKey.ts
+export function roseyKeyFromProp(prop: unknown): string | null {
+  if (typeof prop !== "string" || prop.trim() === "") return null;
+  return prop.replace(/\./g, "_");
+}
+
+export function resolveRosey(roseyProp: unknown, effectiveDataProp: unknown) {
+  if (roseyProp === false) return {}; // explicit opt-out
+  if (typeof roseyProp === "string" && roseyProp) return { "data-rosey": roseyProp };
+  const derived = roseyKeyFromProp(effectiveDataProp);
+  return derived ? { "data-rosey": derived } : {};
+}
+```
+
 ```astro
 ---
+import { resolveRosey } from "../utils/roseyKey";
 const { "data-prop": customDataProp, "data-rosey": roseyProp, ...htmlAttributes } = Astro.props;
 const effectiveDataProp = customDataProp ?? (editable ? "text" : null);
-const effectiveDataRosey = roseyProp === false ? null : (roseyProp ?? effectiveDataProp ?? null);
-const roseyAttributes = effectiveDataRosey ? { "data-rosey": effectiveDataRosey } : {};
+const roseyAttributes = resolveRosey(roseyProp, effectiveDataProp);
 ---
 <span class="inner-text" {...textDataAttributes} {...roseyAttributes}>...</span>
 ```
@@ -79,6 +113,19 @@ Key points:
 - **Destructure `data-rosey` from props** — prevents it leaking into `...htmlAttributes` and landing on the wrong element
 - **`data-rosey={false}` opts out** — use on instances that should not be translated (proper nouns, names)
 - **`editable={false}` components** need explicit `data-rosey="key"` since auto-derive depends on `data-prop`
+
+## Markdown Regions: `data-type` and the Bound Input
+
+A `data-rosey` region rendering markdown needs **both** halves, or it is permanently stale and its formatting is uneditable ([§3c](tagging.md#markdown-regions-need-a-matching-data-type-and-a-rich-bound-input-rcc-layer)):
+
+| Astro render call        | `data-type`         |
+| ------------------------ | ------------------- |
+| `md.render(value)`       | `data-type="block"` |
+| `md.renderInline(value)` | `data-type="text"`  |
+
+And the CloudCannon input bound to that field must resolve to `markdown` or `html` — a `text` input stores raw source that can never match the rendered HTML Rosey captured.
+
+**A rich field passed through a `<slot>` bypasses the markdown render entirely**, so no `data-type` value is correct. Render the field inside the component instead of accepting pre-rendered children.
 
 ## RTL Language Support
 
@@ -105,9 +152,27 @@ When implementing split-by-directory (Phase 8 of the main skill) in Astro:
 
 - Define content collections for each locale in `content.config.ts` with the same schema as the English collection.
 - Use a dynamic `[locale]` route: `src/pages/[locale]/blog/[...slug].astro`, with `getStaticPaths` iterating locale codes and fetching from the matching collection.
+- **MUST build the path from the entry's file id, not its translated title** — every locale's copy of a post shares one URL path (Phase 8 step 3).
 - Suppress auto-derived `data-rosey` on frontmatter fields with `data-rosey={false}`.
 - Use snake_case collection names (`blog_fr`, `blog_de`) — consistent with `data_config` keys like `locales_fr`.
-- **All-languages-prefixed mode:** the default language also needs a prefixed route (`/en/blog/...`) and a matching collection URL (Phase 5e), so include the default locale in `getStaticPaths` and give its collection a `/en/` `url` — don't leave the default-language split pages at root.
+- **All-languages-prefixed mode:** these per-locale collections are **the one exception** to the "never prefix your own routes" rule (Phase 1 step 5) — because the SSG, not Rosey, generates them. So the default language also needs its own prefixed route (`/en/blog/...`) and a matching collection URL (Phase 5e): include the default locale in `getStaticPaths` and give its collection an `/en/` `url`. **Ordinary routes must still not be prefixed** — `about.astro` stays at `/about/` and `rosey build` relocates it.
+
+### Per-locale queries
+
+Astro sites avoid the locale-mixing problem in Phase 8 step 6 for free **only if every query names its collection**: `getCollection(blogCollectionFor(locale))`, never a bare `getCollection("blog")` filtered afterwards. Audit RSS endpoints, sitemaps, "recent posts" components, and search-index builders — those are the ones that tend to keep a hardcoded default-language collection name.
+
+### Internal links
+
+Rosey rewrites links only on pages it generates, and these pages already exist at the locale URL, so their links need prefixing in the template (Phase 8 step 7):
+
+```ts
+export function localizeUrl(url: string, locale: string, defaultLocale: string) {
+  if (!url || locale === defaultLocale) return url; // don't double-prefix
+  if (!url.startsWith("/") || url.startsWith("//")) return url;
+  if (/\.[a-z0-9]+$/i.test(url)) return url; // /feed.xml lives only at the root
+  return `/${locale}${url}`;
+}
+```
 
 ### Rosey-root alignment for locale pages
 
@@ -132,7 +197,7 @@ const rccExclude = hideLocaleSwitcher ? localeCodes.join(",") : undefined;
 
 Astro omits the attribute entirely when the value is `undefined`, so pages that don't opt in are untouched. Set the prop in the **post layout** (`Post.astro`), which both `blog/[slug].astro` and `[locale]/blog/[slug].astro` render through — one place covers every post page.
 
-### Taxonomy routes (Phase 3i in Astro)
+### Taxonomy routes ([§3i](tagging.md#3i-taxonomy-labels-tags-categories) in Astro)
 
 Taxonomy pages need a per-locale route too — `src/pages/[locale]/tags/[tag]/[...page].astro` — or Rosey generates `/{locale}/tags/*` from the default-language page and lists the wrong posts. Mirror the locale blog listing: loop `localeCodes`, build the term set from `getCollection(blogCollectionFor(locale))`, and paginate per term.
 
@@ -150,7 +215,7 @@ This applies to every paginated `[locale]` route, not just taxonomy ones — wor
 
 Pass `roseyRoot="tags"` (not the derived `{locale}/tags/{tag}`) so the page heading shares the chip label key from 3i, and give the pagination component a `basePath` that includes both the locale and the term.
 
-## Head/SEO Text (Phase 3h in Astro)
+## Head/SEO Text ([§3h](tagging.md#3h-head-text-and-attribute-only-text) in Astro)
 
 **`astro-seo` cannot carry `data-*` attributes.** `<SEO>` renders `<title>` via `set:html` with no attribute pass-through, and its `extend.meta` escape hatch whitelists only `name`/`property`/`content`/`httpEquiv`/`media`, silently dropping anything else. So you can't tag its output.
 
@@ -186,7 +251,7 @@ const descriptionKey =
 
 Deriving the key from `pageRoseyRoot` keeps head keys in the same namespace as each page's body keys (`about:page_title` next to `about:heading`). Pages needing a **per-instance** key — taxonomy pages, where every term shares one route — pass an explicit key instead, since a root-derived name would collapse every term onto one key.
 
-**Why title and description are two independent props**, rather than one flag covering both: on taxonomy routes the granularities differ. The title wants one key per term (`tag_page_titles:markdown`), while the description is usually the same sentence on every term page and wants a single shared key (`tag_page_description`). A single derived namespace can't serve both.
+**Why title and description are two independent props:** on taxonomy routes their granularities differ — one key per term for the title (`tag_page_titles:markdown`), one shared key for the description (`tag_page_description`). No single derived namespace serves both.
 
 **Thread the props through intermediate layouts.** A `Page.astro`/`Paginated.astro` that spreads `{...frontmatter}` into the root layout won't forward a prop that isn't part of frontmatter — add it explicitly or the opt-in silently does nothing.
 
@@ -200,7 +265,7 @@ Deriving the key from `pageRoseyRoot` keeps head keys in the same namespace as e
 | `[locale]/tags/[tag]/[...page].astro`                     | Yes, but with **explicit** keys — one route serves every term (see 3i)                                                                                    |
 | Default-language listing at root (`blog/[...page].astro`) | No — native `/{locale}/blog/` routes exist, so Rosey never generates locale copies of it                                                                  |
 
-**Watch for the composite title.** `pageTitle` is typically `` `${title} | ${site.site_title}` ``, so the head string is never byte-identical to the on-page `<h1>`, and Rosey matches whole strings per key. That rules out reusing an existing body key for the `<title>` — expect one extra key per page. (Home pages often skip the suffix and _do_ match their `<h1>`, but if that heading is a page-builder block its key embeds the block `_uuid`, so reusing it dangles the `<title>` the moment an editor swaps the block. Don't.)
+**Watch for the composite title.** `pageTitle` is typically `` `${title} | ${site.site_title}` ``, so the head string is never byte-identical to the on-page `<h1>` and Rosey matches whole strings per key. Expect one extra key per page rather than reusing a body key — and never reuse a page-builder block's key, whose namespace embeds a `_uuid` that changes when an editor swaps the block.
 
 Pages with no `seo` frontmatter fall back to a site-wide description, so several distinct `*:page_description` keys can hold the same sentence. Either accept the duplicate translation work or give those pages one shared key.
 
@@ -367,9 +432,14 @@ Astro's `fallback: { fr: "es" }` swaps whole pages to another locale when a page
 
 ## Gotchas
 
-- **Slug derivation via `Astro.url.pathname`.** `Astro.url.pathname.replace(/^\/|\/$/g, '') || 'index'` in the component that renders `<main>`.
+- **`Astro.url.pathname` is only safe where one route means one URL.** Paginated and taxonomy routes MUST pass an explicit `roseyRoot`, or page 2 duplicates every key.
 - **Array items: rosey attributes go inside the item component, not the loop wrapper.** Otherwise CloudCannon's clone-on-add/reorder produces a stale, duplicated `data-rosey-ns`. Give each item its own registered component with `data-component` on the `data-editable="array-item"`.
+- **Structural wrappers get no `data-rosey-ns`.** A grid cell or column that only positions children re-keys everything inside it when a block is dragged between wrappers.
+- **Derived keys must have `.` replaced with `_`.** Route it through one helper; a dotted key silently drops Visual Editor saves while the translated site looks correct.
+- **A markdown region needs both a matching `data-type` and a rich bound input** — either alone leaves it permanently stale and uneditable. A field passed through a `<slot>` can't have a correct `data-type` at all.
 - **Rosey-root alignment for locale pages.** Pass a `roseyRoot` prop that strips the locale prefix; locale route files pass the English-equivalent path.
+- **Split-by-directory pages must localize their own hrefs** — skip extensioned paths, and don't prefix on the default language.
+- **Name the collection in every query.** `getCollection(collectionFor(locale))`, not a bare default-language collection filtered later — that's how RSS feeds and "recent posts" quietly serve English on `/fr/`.
 - **snake_case collection names** (`blog_fr`, `blog_de`) — consistent with CloudCannon conventions.
 - **RTL `dir` script needs `is:inline`.** Without it Astro defers the script as a module and RTL pages flash LTR.
 - **Locale picker must match the URL-structure mode.** With all-languages-prefixed (no `--default-language-at-root`), the default language lives under `/en/`, so the picker's default-language link is `/en{basePath}` (set `defaultLanguageAtRoot = false` in the snippet above) and path parsing must treat `en` as a locale segment too — otherwise the default-language link points at `/`, which serves the redirect page.

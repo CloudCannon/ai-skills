@@ -68,9 +68,11 @@ scripts/setup-editable-regions.sh       Installs package, wires Astro integratio
 
 ── make-site-multilingual (outside the migration phases) ──────
 SKILL.md                                Entry point — the 9 phases, RCC layer, gotchas, v1→v2 upgrade
-astro.md                                Astro-specific: slug derivation, head/SEO, taxonomy routes
-eleventy.md                             Eleventy-specific tagging and pipeline
-hugo.md                                 Hugo-specific tagging and pipeline
+tagging.md                              Phase 3 in full — every data-rosey/-ns/-root authoring rule
+troubleshooting.md                      Symptom → cause → fix for builds that translate wrongly
+astro.md                                Astro-specific: root derivation, head/SEO, taxonomy routes
+eleventy.md                             Eleventy-specific tagging, taxonomy scoping, link localization
+hugo.md                                 Hugo-specific tagging and pipeline (partial — see its coverage note)
 
 ── translate-multilingual (outside the migration phases) ──────
 SKILL.md                                Entry point — locale JSON (Part 1), content dirs (Part 2)
