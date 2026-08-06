@@ -17,7 +17,7 @@ Two translation systems can run on the same site, and this skill covers both:
 | **Rosey locale JSON** (`rosey/locales/{code}.json`)     | Shared UI and any page text tagged with `data-rosey` — nav, footer, headings, buttons, breadcrumbs, and (for non-split pages) whole page bodies | **Part 1** |
 | **Content collection files** (`blog_fr/`, `blog_de/` …) | Split-by-directory body content + per-post frontmatter (title, description, alt text) that the SSG renders natively per locale                  | **Part 2** |
 
-**Most sites only need Part 1.** Only reach for Part 2 if the project actually has per-locale content directories (split-by-directory, set up in the `make-site-multilingual` skill, Phase 8). A split-by-directory _page_ needs both: its body comes from a content collection file (Part 2), its shared UI from the locale JSON (Part 1).
+**Most sites only need Part 1.** Only reach for Part 2 if the project actually has per-locale content directories (split-by-directory, set up in the [`make-site-multilingual`](../make-site-multilingual/SKILL.md) skill, Phase 8). A split-by-directory _page_ needs both: its body comes from a content collection file (Part 2), its shared UI from the locale JSON (Part 1).
 
 This skill is written for AI coding agents, but the process works with any AI tool that reads and writes JSON.
 
@@ -80,12 +80,12 @@ This skill ships helper scripts that do the mechanical work (classification, tra
 2. **Translate** — the AI reads the task file and fills in translations.
 3. **Merge** — a script merges translations back into the full locale file.
 
-If the scripts aren't available (not copied via `add-skills`), use the **Manual Fallback** at the end of Part 1.
+**Locate the scripts before running them.** The commands below assume the skills were copied to `skills/` in the project root. Depending on the install route they may be under `.agents/skills/`, `.cursor/skills/`, or a plugin directory outside the project — adjust the path to wherever this skill's `scripts/` sits. If they aren't present at all, use the **Manual Fallback** at the end of Part 1.
 
 ### Phase 1.1: Prepare
 
 ```bash
-node .cursor/skills/translate-multilingual/scripts/prepare-translation.mjs --locale fr
+node skills/translate-multilingual/scripts/prepare-translation.mjs --locale fr
 ```
 
 The script:
@@ -136,7 +136,7 @@ After translating, write the task file back to the same path with `value` fields
 ### Phase 1.3: Merge
 
 ```bash
-node .cursor/skills/translate-multilingual/scripts/merge-translation.mjs --locale fr
+node skills/translate-multilingual/scripts/merge-translation.mjs --locale fr
 ```
 
 The script:
@@ -206,7 +206,7 @@ First identify the source and locale directories: look for `{collection}_{locale
 Then, per locale collection:
 
 ```bash
-node .cursor/skills/translate-multilingual/scripts/prepare-content-translation.mjs \
+node skills/translate-multilingual/scripts/prepare-content-translation.mjs \
   --source-dir src/content/blog \
   --locale-dir src/content/blog_fr \
   --locale fr
@@ -269,7 +269,7 @@ Write the manifest back with `translated_frontmatter` / `translated_body` added.
 ### Phase 2.3: Merge
 
 ```bash
-node .cursor/skills/translate-multilingual/scripts/merge-content-translation.mjs \
+node skills/translate-multilingual/scripts/merge-content-translation.mjs \
   --input src/content/.translation-task-fr-content.json
 ```
 
@@ -305,4 +305,4 @@ The script patches translated frontmatter into the YAML (preserving structural f
 
 ## Learnings and Gotchas
 
-> This section is a living document. When you discover new patterns, issues, or improvements while translating, **ask the user** before appending them here. See the living-docs-protocol rule.
+> This section is a living document. When you discover new patterns, issues, or improvements while translating, **ask the user** before appending them here. See the repo README's **Key conventions → Living documents**.

@@ -16,7 +16,7 @@ Step-by-step workflow for making a single-language site translatable with **Rose
 
 Keep these separate in your head. They are installed together but do different jobs, and only the first is required.
 
-1. **Rosey-ready (required).** Rosey is an open-source, framework-agnostic tool that operates on your **built HTML**. You tag translatable elements with `data-rosey`, and a postbuild pipeline generates a key/value file per locale (`rosey/locales/{code}.json`) and builds translated copies of the site at `/{locale}/` URLs. This works on any SSG with no CMS. Once a site is Rosey-ready, translations can be filled in by **AI** (see the `translate-multilingual` skill), by hand, or by any external service.
+1. **Rosey-ready (required).** Rosey is an open-source, framework-agnostic tool that operates on your **built HTML**. You tag translatable elements with `data-rosey`, and a postbuild pipeline generates a key/value file per locale (`rosey/locales/{code}.json`) and builds translated copies of the site at `/{locale}/` URLs. This works on any SSG with no CMS. Once a site is Rosey-ready, translations can be filled in by **AI** (see the [`translate-multilingual`](../translate-multilingual/SKILL.md) skill), by hand, or by any external service.
 
 2. **The RCC visual-editing layer (optional).** The RCC is a client-side script that bridges those locale files to CloudCannon's Visual Editor, giving editors a floating locale switcher and inline ProseMirror editors on every `data-rosey` element, with stale-translation detection. It **requires CloudCannon** as the CMS. If the site isn't on CloudCannon, skip every RCC/CloudCannon step and translate the locale files another way.
 
@@ -158,6 +158,7 @@ Tag every element containing user-visible text:
 
 - `data-rosey` only captures the **text content** (`innerHTML`) of the element.
 - **Place it on the innermost text element**, not a wrapper that contains other tags (icons, nested components, SVGs) — otherwise those tags become part of the captured original, and worse, get injected twice on translated pages (see the "Mixed text + non-text children" gotcha).
+- **Exception — rich text regions: tag the region, not its contents.** Where the text sits inside a CloudCannon rich text region (`data-editable="source"`, or a `text` region with `data-type="text"`/`"block"`), `data-rosey` goes on the **region element itself**, even though that means tagging a wrapper. CloudCannon owns the markup inside a region and can't round-trip a `data-rosey` on it, so the tagged element renders as uneditable. The region's full inner HTML — `<p>` tags included — becomes the captured original, which is correct here: the region holds only prose, so there's no non-text markup to double-inject, and the connector's locale editors are `html` inputs that edit it as rich text. One region, one key. See [cloudcannon-visual-editing/editable-regions.md § Rich text region contents are editor-owned](../cloudcannon-visual-editing/editable-regions.md#rich-text-region-contents-are-editor-owned).
 - **Skip proper nouns**: don't tag names, author names, designations, or other identity values that stay the same across locales.
 - For elements that already have CloudCannon `data-editable` / `data-prop` attributes, add `data-rosey` alongside them — they serve different purposes.
 - Use `data-rcc-ignore` on elements that have `data-rosey` but should not appear in the RCC locale switcher **(RCC layer)**.
@@ -238,6 +239,103 @@ Without `instance_value`, use the item type + a zero-based index (`data-rosey-ns
 
 **Read the SSG-specific file** for code examples in your framework.
 
+### 3h. Translate `<head>` text (`<title>`, meta description)
+
+Easy to miss, because nothing looks broken: the page body translates, the browser tab and search snippet stay in the default language.
+
+**Rosey does scan `<head>`.** Untagged head text is copied verbatim onto generated pages, so a `<title>` without a key stays in the default language forever. Tag it like anything else:
+
+```html
+<title data-rosey="about:page_title">About | My Site</title>
+```
+
+For text living in an **attribute** rather than element content, use `data-rosey-attrs-explicit` — a JSON object mapping attribute name to key:
+
+```html
+<meta
+  name="description"
+  content="A starter template."
+  data-rosey-attrs-explicit='{"content":"about:page_description"}'
+/>
+```
+
+Prefer it over the comma-separated `data-rosey-attrs`, which **also emits an empty key for the element's (non-existent) inner text**: `data-rosey-attrs="content"` + `data-rosey="page_desc"` produces both `page_desc.content` and a junk `page_desc` → `""`. `attrs-explicit` produces exactly one key per attribute.
+
+Head elements sit **outside** the `<main data-rosey-root=...>` container, so they get no namespace from it. Their keys are global — spell the namespace into the key string (`about:page_title`) to keep them grouped alongside that page's body keys in the locale editors.
+
+#### How far to go: do both, but know they're separable
+
+**Default to keying both.** Anywhere organic search matters per-locale, an untranslated description is a real gap, and the second half is cheap once the first is in place: one more tagged element and one more key per page.
+
+The two halves are independent, though, so it's worth knowing the trade if someone wants to cut scope:
+
+- **`<title>` is the high-value, low-cost half.** User-visible (browser tab, search-result heading) and needs only a plain `data-rosey` attribute.
+- **The meta description** is invisible on the page and a weaker ranking signal, and it's the half that drags in the `attrs-explicit`/JSON-object form — the least obvious thing in this section.
+
+So title-only is a defensible stopping point for a throwaway demo, and adding descriptions later is purely additive. But it isn't the right default: **don't quietly ship title-only on a production site** — if you're tempted to cut it for simplicity, ask first. The complexity saved is roughly one derived key and one tagged element, which is usually not worth an untranslated snippet in every locale.
+
+Watch for pages with **no `seo` frontmatter** — they fall back to a site-wide description, so several `*:page_description` keys end up holding the same sentence. Give those one shared key rather than making translators repeat themselves.
+
+#### Which pages need head keys
+
+Triage by **where the head text comes from**, not by whether the page is translated:
+
+| Page                                                                                                                                             | Needs head keys?                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| Default-language page that Rosey generates locale copies of (Home, About, 404)                                                                   | **Yes** — generation copies head text verbatim       |
+| A per-locale route that reads its title/description from the **default-language** source (a listing page fetching the shared `pages/blog` entry) | **Yes** — easy to overlook, since it's a locale page |
+| Split-by-directory page whose head comes from its own translated frontmatter (Phase 8 post pages)                                                | **No — actively harmful**                            |
+
+**Why the last row is harmful.** Those heads are already correct from the locale collection file. Add a key and you get a second, winning source of truth: when the key has a translation, Rosey **overwrites** the frontmatter value.
+
+```
+frontmatter:      Édition en Markdown | Starter
+rosey fr.json:    TRADUCTION | Starter
+built /fr/ page:  TRADUCTION | Starter     ← frontmatter translation is now dead
+```
+
+(With the key _untranslated_ Rosey leaves the existing text alone rather than substituting the default-language base — so this stays invisible until someone translates that key.) Worse, one key used on both `/blog/x/` and `/fr/blog/x/` **silently collapses to a single entry** with one `original` (the default-language one wins). This is Phase 8 step 6 — "suppress `data-rosey` on frontmatter-driven fields" — applied to the head.
+
+So make head keys **opt-in per page**, never a layout-wide default: a default would land on Phase 8 post pages, the one place they must not go.
+
+#### Don't expect an SSG i18n convention to cover this
+
+Astro's built-in i18n (and equivalents elsewhere) provide routing, URL helpers, fallback, and locale detection — **not** content or head translation; their docs put that explicitly out of scope. The usual SSG answer is either localized frontmatter per page (which is Phase 8, and needs no keys) or a build-time per-locale dictionary lookup. **That lookup is impossible on Rosey-generated pages**: the template renders once, in the default language, so there is no locale in scope to look anything up with. Head tagging isn't a workaround for missing tooling — it's the only mechanism available on those pages.
+
+Note that head text can't be inline-edited in the Visual Editor (it isn't on the page), so these keys are reachable only through the locale files / locales collection. That's expected — flag it to editors rather than trying to engineer around it.
+
+**Read the SSG-specific file** — head tags are often rendered by an SEO component/plugin that won't pass through `data-*` attributes.
+
+### 3i. Taxonomy labels (tags, categories)
+
+Taxonomy terms come from content frontmatter as slugs, and the visible label is usually derived from the slug at build time (`markdown` → `Markdown`). Two consequences for translation:
+
+**Keep slugs untranslated; translate only the label.** The slug is the URL (`/fr/tags/markdown/`), and the same slug must appear in every locale's content files so a term's pages line up across languages. (Rosey translates URLs separately, via the `*.urls.json` files.) A term whose slug differs per locale produces disconnected taxonomy pages.
+
+**Give each term one shared key**, so a label is translated once for every chip, heading, and listing that shows it — put a `data-rosey-root` on the container and use the slug as the key:
+
+```html
+<div data-rosey-root="tags">
+  <a href="/tags/markdown/" data-rosey="markdown">Markdown</a>
+</div>
+```
+
+**Derive the label through a single helper.** Rosey matches whole strings per key, so two render sites that capitalise differently produce a mismatched original and a permanently stale key. One helper also gives acronyms somewhere to live — naive capitalisation turns `seo` into `Seo`, and that misspelling becomes the English original translators work from:
+
+```ts
+const labelOverrides: Record<string, string> = { seo: "SEO" };
+
+export function tagLabel(tag: string): string {
+  return labelOverrides[tag] ?? tag.charAt(0).toUpperCase() + tag.slice(1);
+}
+```
+
+Keep this helper separate from locale config — it only ever produces the **default-language** label. Rosey translates its output via the key, so the helper never needs to know about locales.
+
+**Editing a label invalidates its translations.** Changing the helper's output changes the Rosey original, which marks every translation of that term out of date. Where the translation is still correct (fixing `Seo` → `SEO` when the locale value already said `SEO`), set `_base_original` to the new string in each locale file to pre-clear the review — the equivalent of ticking "mark as reviewed".
+
+Taxonomy pages also need **per-locale routes** so each lists that locale's posts; without them Rosey generates the locale copies from the default-language page, listing the wrong posts. See the SSG-specific file. Their `<title>` needs a key **per term**, which is why 3h has explicit key overrides — a root-derived name would give every term page one title.
+
 ## Phase 4: Make the site Rosey-ready (the pipeline)
 
 This is the required core: a postbuild pipeline that generates locale files and builds translated copies of the site. If you ran `init`, this is already in `.cloudcannon/postbuild` — verify it and move on.
@@ -277,7 +375,7 @@ What each step does:
 
 ## Phase 5: Add the RCC + CloudCannon layer (optional)
 
-> **(RCC layer)** — skip this entire phase if the site isn't on CloudCannon. The site is already translatable via the Phase 4 pipeline; fill in the locale files with the `translate-multilingual` skill or any other method.
+> **(RCC layer)** — skip this entire phase if the site isn't on CloudCannon. The site is already translatable via the Phase 4 pipeline; fill in the locale files with the [`translate-multilingual`](../translate-multilingual/SKILL.md) skill or any other method.
 
 ### 5a. Import the RCC in the root layout
 
@@ -309,6 +407,8 @@ The RCC clones a boundary container when switching locales. Default is `<main>`.
 `<body>` itself **cannot** be the boundary — it hosts the RCC's own UI, CloudCannon's editing infrastructure, and `<script>` tags. If only `<main>` is translatable, omit `data-rcc` and rely on the fallback.
 
 ### 5c. Add `data_config` for locale files
+
+Phases 5c–5e all write `cloudcannon.config.yml`. The [`cloudcannon-configuration`](../cloudcannon-configuration/SKILL.md) skill owns that file — in particular [§ Do this before writing any configuration](../cloudcannon-configuration/SKILL.md#do-this-before-writing-any-configuration), which requires downloading the JSON schemas first. Follow it rather than writing keys from memory.
 
 In `cloudcannon.config.yml`, add an entry per locale. The key **must** follow `locales_{code}`:
 
@@ -355,6 +455,8 @@ collections_config:
 > **Skip this entirely if you kept `--default-language-at-root`** — default-language URLs didn't move, so collection URLs are already correct. This applies whenever you omitted the flag (Phase 1 step 5), even without the RCC — it's a plain CloudCannon-config concern.
 
 When every language is prefixed, the default-language pages move from `/about/` to `/{defaultLang}/about/`. CloudCannon resolves each collection's edit/preview URL (and the Visual Editor iframe) from its `url` config, so **every collection that renders visitor-facing pages must gain the `/{defaultLang}/` prefix**. Without it, CloudCannon opens the old root URL — which now serves only the redirect page — and inline editing breaks.
+
+For `url` placeholders, trailing-slash rules, and troubleshooting a page that won't load in the Visual Editor, see [`cloudcannon-configuration/collection-urls.md`](../cloudcannon-configuration/collection-urls.md).
 
 Prepend the literal default-language code to each collection's existing `url` (here `en`):
 
@@ -445,11 +547,30 @@ For pages with large body content (blog posts, articles, docs), a single Rosey k
 3. **Create locale routes** so the SSG builds `/{locale}/blog/{slug}/`.
 4. **Extract shared rendering logic** and pass `locale` for locale-aware links, dates, and collection selection.
 5. **Align Rosey roots** — locale pages must set `data-rosey-root` to the **English-equivalent** path (`blog/my-post`, not `fr/blog/my-post`) via a `roseyRoot` override that strips the locale prefix.
-6. **Suppress `data-rosey` on body content and frontmatter-driven fields** (title, description, tags) — those are translated in the locale collection files. Keep `data-rosey` on shared UI (breadcrumbs, sidebar headings, share buttons).
+6. **Suppress `data-rosey` on body content and frontmatter-driven fields** (title, description, tags) — those are translated in the locale collection files. Keep `data-rosey` on shared UI (breadcrumbs, sidebar headings, share buttons). **This includes the `<head>`** — don't give these pages head keys (3h); their `<title>`/description already come from the translated frontmatter, and a Rosey value overwrites it. But do check whether a _listing_ route reads its title from the shared default-language entry — those still need keys.
 7. **(RCC layer)** Add CloudCannon collections for each locale (`blog_fr`, `blog_de`) with `url: /{locale}/blog/[full_slug]/`.
 8. **Create a locale config utility** — one file mapping locale codes to collection names, date locale strings, and display labels.
+9. **(RCC layer) Hide the locale switcher on these pages** — see below.
 
-The locale collection files themselves get translated with the **`translate-multilingual`** skill (its content-collections workflow). **Read the SSG-specific file** for routing, collection setup, and suppression details.
+#### Hide the locale switcher on split-by-directory pages **(RCC layer)**
+
+This is the place to use **`data-rcc-exclude`**. Put it on the snapshot boundary listing **every** locale, and the RCC skips injecting its switcher entirely:
+
+```html
+<div data-rcc data-rcc-exclude="fr,de"></div>
+```
+
+Build the list from the locale config rather than hardcoding it, so adding a language doesn't leave one locale switchable on these pages.
+
+**Why it matters.** These pages are translated by editing the locale's own content file, so the switcher offers a locale with nothing to switch — the body is frontmatter-driven and carries no keys. An editor picks FR, sees the post unchanged, and reports translation as broken. Shared UI on the page (nav, footer, "Recent posts") _is_ keyed, but those keys are global and translatable from any other page, so nothing is lost by hiding the switcher here.
+
+**Do it in the shared post layout, not the route**, so it covers the default-language page too — `/blog/my-post/` has the same problem as `/fr/blog/my-post/`.
+
+**A content-editor default doesn't protect you.** Setting `_enabled_editors` to prefer the content editor only changes which editor opens first; editors can still switch to the Visual Editor and hit this. The exclusion is the actual fix.
+
+Note the difference from **`data-rcc-ignore`**, which opts a _single_ `data-rosey` element out of switching (3c). `data-rcc-exclude` works per page, on the boundary, and takes locale codes.
+
+The locale collection files themselves get translated with the [**`translate-multilingual`**](../translate-multilingual/SKILL.md) skill (its content-collections workflow). **Read the SSG-specific file** for routing, collection setup, and suppression details.
 
 ## Phase 9: Visitor-facing locale picker (optional)
 
@@ -486,6 +607,9 @@ Add this to the picker's client-side script: the editor branch hides every `nav[
 - [ ] Each page/route has a `data-rosey-root` set to a unique slug
 - [ ] Reusable sections / array items use `data-rosey-ns` for namespacing — **placed inside each item's component**, not on the loop element
 - [ ] Root `<html>` tag has `lang="{defaultLanguage}"` set (e.g. `<html lang="en">`)
+- [ ] `<title>` **and** meta description tagged (3h) on pages Rosey generates copies of — and **not** on split-by-directory pages whose head comes from translated frontmatter
+- [ ] Pages falling back to a site-wide description share one `page_description` key rather than repeating the same sentence per page (3h)
+- [ ] No page renders two `<title>` tags (check if you suppressed an SEO component's version to emit your own)
 - [ ] `.cloudcannon/postbuild` (or CI hook) runs the full Rosey pipeline
 - [ ] `write-locales --dest` generates the locale manifest at `{build_dir}/_rcc/locales.json`
 - [ ] `rosey/base.json` generates with correct keys; locale files created with correct structure
@@ -702,10 +826,12 @@ Build, run the pipeline, push to CloudCannon, confirm the locale-switcher FAB ap
 ### Universal (framework-agnostic)
 
 - **Rosey operates on built HTML.** It doesn't see source files, markdown, or frontmatter directly — only the rendered output.
+- **`<head>` is scanned, but untagged head text is copied verbatim (§3h).** Bodies translate while the browser tab and search snippet stay in the default language — nothing looks broken. Tag `<title>` with `data-rosey`, and attribute text with `data-rosey-attrs-explicit='{"content":"key"}'` (plain `data-rosey-attrs` also emits a junk empty key for the element's non-existent inner text). Head elements sit outside `<main>`, so their keys are global — write the namespace into the key.
+- **Never give split-by-directory pages head keys (§3h).** Their `<title>`/description already come from translated frontmatter; once the key has a translation Rosey overwrites that value, and one key used at both `/blog/x/` and `/fr/blog/x/` silently collapses to a single entry keeping the default-language `original`.
 - **`--default-language-at-root` is a decision, not a default — ask.** Present (default at root): existing URLs stay, no collection-URL changes. Omitted (all languages prefixed): the default language moves to `/{defaultLang}/*`, `/` serves a generated redirect page, and every visitor-facing collection `url` needs the `/{defaultLang}/` prefix (Phase 5e). The choice must be identical in `.cloudcannon/postbuild`, Phase 6's manual test, and Appendix B — a mismatch silently builds the wrong URL layout.
 - **All-languages-prefixed: the root `index.html` is a redirect, not a page.** Don't tag it with `data-rosey` or treat it as a content page — Rosey generates it, and it's overwritten each build.
 - **All-languages-prefixed: collection URLs must move too.** CloudCannon reads a collection's `url` to open the Visual Editor; if the pages moved to `/{defaultLang}/` but the `url` still says `/[slug]/`, editing opens the redirect page and breaks.
-- **`data-rosey` must go on the innermost text element.** Otherwise the captured original includes wrapper tags.
+- **`data-rosey` must go on the innermost text element.** Otherwise the captured original includes wrapper tags. **Except inside a CloudCannon rich text region** (`data-editable="source"`, or `text` with `data-type="text"`/`"block"`), where it goes on the region element — a key on a block inside the region can't survive the editor's round-trip and shows up as an uneditable element (§3c).
 - **Don't translate names.** Author names, person names, designations are identity values — no `data-rosey`.
 - **Key collisions.** Two pages with the same `data-rosey-root` and same element keys collide. Use unique roots (the page slug).
 - **Empty `data-rosey-root`.** `data-rosey-root=""` resets the namespace — useful for global components.
@@ -716,6 +842,7 @@ Build, run the pipeline, push to CloudCannon, confirm the locale-switcher FAB ap
 - **Stale translation detection.** When `original` ≠ `_base_original`, the RCC shows an amber dashed border and warning badge. Editors update the translation or click "Mark as reviewed".
 - **`write-locales` preserves existing translations but removes stale keys.** It adds new keys, removes keys no longer in `base.json`, and never overwrites existing `value` fields on surviving keys.
 - **Snapshot boundary** _(RCC layer)_. The RCC clones `[data-rcc]` (or `<main>`) on locale switch; content outside it isn't switched. Most sites want `data-rcc` around nav + main + footer. Never `<body>`.
+- **Split-by-directory pages need `data-rcc-exclude` listing every locale** _(RCC layer)_. Otherwise the Visual Editor offers a locale switch that can't change anything — the body has no keys — and editors read that as broken translation. Apply it in the shared post layout so the default-language page is covered too (Phase 8).
 - **Rosey's default exclusions block JSON files.** Use `--exclusions "\.(html?)$"` so `_rcc/locales.json` and `_cloudcannon/info.json` flow through to the output.
 - **Rosey merges with pre-existing locale pages.** At an already-built locale URL, `rosey build` respects existing content and only translates `data-rosey` elements — the basis of split-by-directory.
 - **Rosey rewrites internal links on generated pages, not pre-existing ones.** Copied pages get `<a href>` values prefixed with the locale; split-by-directory pages (already at the locale URL) keep their links as-is.
@@ -730,7 +857,7 @@ Build, run the pipeline, push to CloudCannon, confirm the locale-switcher FAB ap
 
 ### Editable regions / component inline editing
 
-> Applies only to sites using editable regions (`data-prop`, `data-editable`). The RCC works without them — skip if your original text has no inline editing.
+> Applies only to sites using editable regions (`data-prop`, `data-editable`). The RCC works without them — skip if your original text has no inline editing. Editable regions themselves are owned by the [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md) skill; the notes below cover only where `data-rosey` and regions interact.
 
 - **Shared components need explicit `data-rosey` passthrough** to the inner text element — a rest-spread would land it on the outer tag.
 - **Destructure `data-rosey`** alongside `data-prop` to prevent it leaking onto the outer wrapper.

@@ -110,6 +110,12 @@ Issues you'll hit while configuring or debugging a real site, with their fix.
 | Astro | [astro/configuration.md](astro/configuration.md)                 | Full configuration workflow, customization checklist, verification checklist    |
 | Astro | [astro/configuration-gotchas.md](astro/configuration-gotchas.md) | Icon fields, numeric values, markdown tables, and other Astro-specific pitfalls |
 
+**Other skills:**
+
+| Skill                                                        | When to read                                                                                                                                                                                        |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [make-site-multilingual](../make-site-multilingual/SKILL.md) | Configuring a multilingual site — `locales_{code}` entries under `data_config`, per-locale collections, locale-prefixed collection URLs, and why a `source:` key breaks `rosey/locales/` resolution |
+
 ## Key concepts
 
 ### CloudCannon CLI

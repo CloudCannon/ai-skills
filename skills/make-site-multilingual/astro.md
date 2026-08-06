@@ -117,6 +117,93 @@ Split-by-directory locale pages derive `data-rosey-root` from the URL, which inc
 <main data-rosey-root={roseyRoot ?? derivedSlug}>
 ```
 
+### Hiding the locale switcher on post pages
+
+Take a `hideLocaleSwitcher` prop on the root layout and turn it into the exclusion list, derived from the locale config:
+
+```astro
+---
+import { localeCodes } from "../utils/locales";
+const { hideLocaleSwitcher } = Astro.props;
+const rccExclude = hideLocaleSwitcher ? localeCodes.join(",") : undefined;
+---
+<div data-rcc data-rcc-exclude={rccExclude}>
+```
+
+Astro omits the attribute entirely when the value is `undefined`, so pages that don't opt in are untouched. Set the prop in the **post layout** (`Post.astro`), which both `blog/[slug].astro` and `[locale]/blog/[slug].astro` render through — one place covers every post page.
+
+### Taxonomy routes (Phase 3i in Astro)
+
+Taxonomy pages need a per-locale route too — `src/pages/[locale]/tags/[tag]/[...page].astro` — or Rosey generates `/{locale}/tags/*` from the default-language page and lists the wrong posts. Mirror the locale blog listing: loop `localeCodes`, build the term set from `getCollection(blogCollectionFor(locale))`, and paginate per term.
+
+**`paginate()` needs `props`, not just `params`.** Route params don't reach `Astro.props`, so a template reading `const { locale } = Astro.props` gets `undefined` — which silently yields `/undefined/tags/...` pagination links and default-language post links:
+
+```astro
+paths.push(...paginate(filteredPosts, {
+  params: { locale, tag },
+  props: { locale },        // ← without this, locale is undefined in the template
+  pageSize,
+}));
+```
+
+This applies to every paginated `[locale]` route, not just taxonomy ones — worth auditing the whole set at once.
+
+Pass `roseyRoot="tags"` (not the derived `{locale}/tags/{tag}`) so the page heading shares the chip label key from 3i, and give the pagination component a `basePath` that includes both the locale and the term.
+
+## Head/SEO Text (Phase 3h in Astro)
+
+**`astro-seo` cannot carry `data-*` attributes.** `<SEO>` renders `<title>` via `set:html` with no attribute pass-through, and its `extend.meta` escape hatch whitelists only `name`/`property`/`content`/`httpEquiv`/`media`, silently dropping anything else. So you can't tag its output.
+
+Both tags are rendered conditionally on their prop being truthy, which gives a clean way in: pass `undefined` to suppress `<SEO>`'s version and emit your own next to it.
+
+In the root layout:
+
+```astro
+---
+// Opt-in, NOT a default — a default would also hit split-by-directory post
+// pages, whose head already comes from translated frontmatter (Phase 3h).
+const { roseySeo, roseyTitleKey, roseyDescriptionKey } = Astro.props;
+
+const titleKey = roseyTitleKey ?? (roseySeo ? `${pageRoseyRoot}:page_title` : undefined);
+const descriptionKey =
+  roseyDescriptionKey ?? (roseySeo ? `${pageRoseyRoot}:page_description` : undefined);
+---
+{titleKey && <title data-rosey={titleKey}>{pageTitle}</title>}
+{descriptionKey && (
+  <meta
+    name="description"
+    content={description}
+    data-rosey-attrs-explicit={JSON.stringify({ content: descriptionKey })}
+  />
+)}
+
+<SEO
+  title={titleKey ? undefined : pageTitle}
+  description={descriptionKey ? undefined : description}
+  ...
+/>
+```
+
+Deriving the key from `pageRoseyRoot` keeps head keys in the same namespace as each page's body keys (`about:page_title` next to `about:heading`). Pages needing a **per-instance** key — taxonomy pages, where every term shares one route — pass an explicit key instead, since a root-derived name would collapse every term onto one key.
+
+**Why title and description are two independent props**, rather than one flag covering both: on taxonomy routes the granularities differ. The title wants one key per term (`tag_page_titles:markdown`), while the description is usually the same sentence on every term page and wants a single shared key (`tag_page_description`). A single derived namespace can't serve both.
+
+**Thread the props through intermediate layouts.** A `Page.astro`/`Paginated.astro` that spreads `{...frontmatter}` into the root layout won't forward a prop that isn't part of frontmatter — add it explicitly or the opt-in silently does nothing.
+
+**Which Astro routes opt in:**
+
+| Route                                                     | Opt in?                                                                                                                                                   |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[...slug].astro`, `about.astro`, `404.astro`             | Yes — Rosey generates the locale copies                                                                                                                   |
+| `[locale]/blog/[...page].astro` (listing)                 | Yes — `getEntry("pages", "blog")` returns the **default-language** entry for every locale, so its head is untranslated even though the page is per-locale |
+| `[locale]/blog/[slug].astro` (post)                       | **No** — head comes from the `blog_<locale>` collection entry                                                                                             |
+| `[locale]/tags/[tag]/[...page].astro`                     | Yes, but with **explicit** keys — one route serves every term (see 3i)                                                                                    |
+| Default-language listing at root (`blog/[...page].astro`) | No — native `/{locale}/blog/` routes exist, so Rosey never generates locale copies of it                                                                  |
+
+**Watch for the composite title.** `pageTitle` is typically `` `${title} | ${site.site_title}` ``, so the head string is never byte-identical to the on-page `<h1>`, and Rosey matches whole strings per key. That rules out reusing an existing body key for the `<title>` — expect one extra key per page. (Home pages often skip the suffix and _do_ match their `<h1>`, but if that heading is a page-builder block its key embeds the block `_uuid`, so reusing it dangles the `<title>` the moment an editor swaps the block. Don't.)
+
+Pages with no `seo` frontmatter fall back to a site-wide description, so several distinct `*:page_description` keys can hold the same sentence. Either accept the duplicate translation work or give those pages one shared key.
+
 ## Visitor-Facing Locale Picker
 
 When implementing the locale picker (Phase 9 of the main skill) in Astro:

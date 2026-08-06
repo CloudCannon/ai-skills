@@ -47,6 +47,18 @@ Extends `EditableComponent` for editing snippets within rich text content. Manag
 
 ---
 
+## Rich text region contents are editor-owned
+
+A rich text region — `source`, or `text` with `data-type="text"`/`"block"` — has its contents parsed into CloudCannon's editor schema and re-serialized on save. That schema covers block structure and inline marks (`<strong>`, `<a>`, `<code>`), but **not arbitrary attributes**. An attribute on markup _inside_ a region can't survive the round-trip, so CloudCannon flags that markup as uneditable rather than silently dropping it — the region still saves, but the editor can't touch that element.
+
+Attributes on the region **host** are untouched: the host is the region boundary, not its content, so CloudCannon only rewrites what's between its tags.
+
+So anything needing a stable per-element attribute — a translation key (`data-rosey`), an analytics hook, a test id — belongs on the region host, or on a component that renders the markup. Not inside the region. Stability points the same way even where an attribute would survive: editors reshape a region's inner DOM freely (splitting paragraphs, adding lists, reordering blocks), so an element you tagged may not exist after the next edit. Treat the region as the smallest addressable unit.
+
+A snippet can teach the editor to round-trip custom markup, and is the right tool when the markup is genuinely content the editor should manage. It's the wrong tool for developer plumbing: the attribute becomes an editor-facing form field that can be duplicated into a collision, and the prose turns into a snippet card instead of inline WYSIWYG. Prefer hoisting the attribute out of the region.
+
+---
+
 ## When to Use a Component Editable Region
 
 Primitive editables update their own DOM slice but can't re-render the surrounding template. Wrap a section in a component when it has any of the signals below — without a component region, data-driven changes to conditional or computed markup don't reflect live.
