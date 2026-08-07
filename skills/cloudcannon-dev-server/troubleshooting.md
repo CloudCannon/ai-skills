@@ -1,0 +1,64 @@
+# Troubleshooting
+
+## The editor
+
+| Symptom                                          | Cause                                                         | Fix                                                                                                                                                             |
+| ------------------------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site frame ready — 0 editable region(s)`        | Wrong frame, or the page genuinely has no regions             | Check `ve-eval.mjs --expr "document.body.innerHTML.length"`. If it is tiny you have the host shim, not the site — take the **last** frame named `editor-iframe` |
+| Timed out waiting for the site frame             | The page never loaded in the preview                          | Confirm `--url` points at a path the server serves: `dev-status.mjs --check /en/`                                                                               |
+| Editor shows an old version of the page          | The editor cached the page it loaded                          | Rebuild, then re-run `ve-open.mjs`. A rebuild alone does not refresh an open editor                                                                             |
+| `/en/` returns 500                               | The dev server has no directory index; EISDIR surfaces as 500 | Request `/en/index.html`, or use `dev-status.mjs`, which retries automatically                                                                                  |
+| Everything looks right but the change is absent  | The output directory was never rebuilt                        | `dev-status.mjs` reports STALE. `cloudcannon dev` never builds                                                                                                  |
+| `cannot attach to Chrome on port 9222`           | The browser is not running                                    | `node scripts/browser.mjs start`                                                                                                                                |
+| `SyntaxError: Named export 'chromium' not found` | `playwright-core` is CommonJS                                 | Default-import it: `import pw from "playwright-core"; const { chromium } = pw;`                                                                                 |
+
+## Addressing
+
+| Symptom                               | Cause                                                                       | Fix                                                                                                       |
+| ------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `no region at "0"`                    | You read `data-prop` off an element and used it directly                    | `data-prop` is relative. Use the composed address from `ve-components.mjs`                                |
+| Two regions share a path              | An image nested in an array item has no `data-prop` of its own              | Use the `#kind` qualifier: `content_blocks.0#image`                                                       |
+| Locator timed out during an edit      | The subtree re-rendered and detached the element                            | Re-resolve the address; do not hold a locator across an edit                                              |
+| Only the first character was typed    | Key-by-key typing re-renders per keystroke                                  | Use `insertText` (what `ve-type.mjs` does)                                                                |
+| A component is missing from the index | The site uses the `<editable-*>` element form, or the component is Bookshop | Both are indexed; if one is genuinely missing, check it is inside `<body>` and confirm with `ve-eval.mjs` |
+| Addresses changed between runs        | Array items are positional                                                  | Match on `id` (the `_uuid`) from `ve-components.mjs --json`                                               |
+
+## Regions and inputs
+
+| Symptom                                                    | Cause                                                                                      | Fix                                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| A section is not editable in the editor                    | CloudCannon never wired the region — it is marked up but inert                             | `check-editable-regions.mjs`; a text region without `contenteditable` is the tell |
+| A region reports "renders nothing"                         | The field is empty, so there is nothing on the page to click                               | Seed a value, or rely on the sidebar for that field                               |
+| A region reports "has content but no box"                  | Usually `display: contents` on a wrapper                                                   | Not a fault by itself; confirm it is clickable in the editor                      |
+| Editors reorder an array and content jumps to another item | The array wrapper has no `data-id-key`, so keys are positional                             | Add `data-id-key` (usually `_uuid`) and seed the field                            |
+| An array item shows the wrong fields                       | It matched a different structure than intended                                             | `inputs-dump.mjs` — array items are listed by the structure they matched          |
+| An input is missing from the sidebar                       | The `_inputs` key does not match the data key, or the schema does not apply                | `inputs-dump.mjs` shows what was actually rendered                                |
+| Nested inputs do not appear in the dump                    | CloudCannon swaps child views rather than expanding inline, so they are not in the DOM yet | `inputs-dump.mjs --into "<item name>"`                                            |
+| An input reports type `button`                             | Select inputs render as a button that opens a listbox                                      | Expected — `inputs-dump.mjs` maps these to `select`                               |
+
+## Saving
+
+| Symptom                                        | Cause                                                  | Fix                                                 |
+| ---------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------- |
+| Edit visible on screen, file unchanged         | Nothing committed the value                            | Blur after editing; allow ~1–3s before reading back |
+| `403 App sync is disabled`                     | Server started with `--no-app-sync`                    | Restart without it                                  |
+| The diff is much larger than the edit          | CloudCannon reserialises the whole frontmatter on save | Expected. Diff the field you changed                |
+| `write-file.mjs` produced no `file-edit` event | App-initiated writes are deliberately not echoed       | Read the file back instead of watching for an event |
+
+## RCC / multilingual
+
+| Symptom                                           | Cause                                                                                          | Fix                                                                                                                                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No locale switcher                                | `/_rcc/locales.json` 404 — the most common RCC failure, indistinguishable from a broken editor | Run `check-rcc.mjs`; the manifest is checked first. It is written by `write-locales`, and Rosey's default `--exclusions` strips JSON unless the postbuild overrides it |
+| `RCC: loaded` but no `Ready — N locales`          | `init()` returned early                                                                        | Add `data-rcc-verbose` to the page and re-run `ve-console.mjs`                                                                                                         |
+| Switcher present, switching does nothing          | No `[data-rosey]` elements on the page                                                         | `ve-components.mjs --rosey`                                                                                                                                            |
+| Asserting `data-rcc-locale-active === "fr"` fails | It is a **boolean** attribute (`toggleAttribute`), never the locale code                       | Assert presence; read the locale from `[data-rcc-translation-root]`                                                                                                    |
+| Overlays left behind after switching back         | Restore did not complete                                                                       | `check-rcc.mjs` asserts zero `[data-rcc-translation-root]` remain                                                                                                      |
+
+## Scripts
+
+| Symptom                                          | Cause                                          | Fix                                                                                     |
+| ------------------------------------------------ | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| A script hangs and never exits                   | The CDP connection keeps the event loop alive  | Every script must end with `await browser.close()` — it detaches without closing Chrome |
+| Repeated `--check` flags — only the last applied | Flag parsing overwrote instead of accumulating | Fixed in `lib/args.mjs`; repeats collect into an array                                  |
+| `Cannot find module './ve-*.mjs'`                | Run from the wrong directory                   | Use an absolute path, or `cd` into `scripts/`                                           |

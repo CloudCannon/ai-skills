@@ -4,17 +4,17 @@ Phase 3 of [`SKILL.md`](SKILL.md), in full. Add Rosey attributes to the built HT
 
 **MUST verify on a translated page.** Almost every mistake in this file renders correctly in the default language — Rosey doesn't inject there. Check `/{locale}/`, not `/`.
 
-| §                                                               | Covers                                                         |
-| --------------------------------------------------------------- | -------------------------------------------------------------- |
-| [3a](#3a-set-up-data-rosey-root-on-page-containers)             | Page-level namespace                                           |
-| [3b](#3b-add-data-rosey-ns-for-component-namespacing)           | `ns` vs `root` semantics                                       |
-| [3c](#3c-add-data-rosey-to-translatable-elements)               | Tagging text elements; rich text regions; markdown `data-type` |
-| [3d](#3d-handle-shared-and-global-content)                      | Nav, footer, and shared chrome inside `<main>`                 |
-| [3e](#3e-derive-the-root-from-the-templates-source-identity)    | Where the root value comes from — and why not the URL          |
-| [3f](#3f-component-integration-auto-derive-data-rosey-optional) | Auto-deriving keys from `data-prop`                            |
-| [3g](#3g-namespacing-arrays-and-page-builder-blocks)            | Arrays, page-builder blocks, UUID seeding, content-as-key      |
-| [3h](#3h-head-text-and-attribute-only-text)                     | Text Rosey can't reach as element content                      |
-| [3i](#3i-taxonomy-labels-tags-categories)                       | Tag and category labels                                        |
+| §                                                               | Covers                                                                 |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| [3a](#3a-set-up-data-rosey-root-on-page-containers)             | Page-level namespace                                                   |
+| [3b](#3b-add-data-rosey-ns-for-component-namespacing)           | `ns` vs `root` semantics                                               |
+| [3c](#3c-add-data-rosey-to-translatable-elements)               | Tagging text elements; rich text regions; markdown `data-type`         |
+| [3d](#3d-handle-shared-and-global-content)                      | Nav, footer, and shared chrome inside `<main>`                         |
+| [3e](#3e-derive-the-root-from-the-templates-source-identity)    | Where the root value comes from — and why not the URL                  |
+| [3f](#3f-component-integration-auto-derive-data-rosey-optional) | Auto-deriving keys from `data-prop`                                    |
+| [3g](#3g-namespacing-arrays-and-page-builder-blocks)            | Arrays, page-builder blocks, region root, UUID seeding, content-as-key |
+| [3h](#3h-head-text-and-attribute-only-text)                     | Text Rosey can't reach as element content                              |
+| [3i](#3i-taxonomy-labels-tags-categories)                       | Tag and category labels                                                |
 
 ## 3a. Set up `data-rosey-root` on page containers
 
@@ -142,6 +142,24 @@ This is the single most important authoring rule for arrays, and getting it wron
 The fix: make **each array item its own registered component**, and put the rosey namespace/keys **on that component's own root**, so CloudCannon renders each item directly and every item carries its own live `_uuid`. Put `data-component="<registered-name>"` on the `data-editable="array-item"` element — that single attribute is the whole fix for a uniform sub-array (no `data-component-key`, `data-id-key`, or `<template>` needed). See `astro.md` for the full before/after example.
 
 > Rule of thumb: **if a loop renders items, the `data-rosey`/`data-rosey-ns` attributes belong inside the item's component, never on the parent's loop wrapper.**
+
+### Rule: the array-item region element must be the component's own root **(RCC layer)**
+
+**MUST** land the caller's `data-editable="array-item"` / `data-component` / `data-id` on the **outermost element the item component renders**, not on an element nested inside it.
+
+**Why:** CloudCannon re-renders the component and diffs the result against the region element's _children_, so a region nested inside its own component receives a second copy of that component's root — `data-rosey-ns` included. Every key below it gains a duplicated segment (`…:<uuid>:<uuid>:heading`), matches nothing in the locale files, and the connector falls back to source text. Rosey never sees this DOM, so the translated site is perfect and only the Visual Editor is wrong.
+
+With a rest-spread, that means spreading it on the template's first element:
+
+```astro
+{/* htmlAttributes carries the caller's data-editable/data-component */}
+<GridItem {...htmlAttributes}>
+  <Card data-rosey-ns={_uuid}>
+```
+
+The namespace itself can stay on an inner element — only the region attributes have to sit on the root, and moving them changes no keys.
+
+**Common miss:** that root is usually another component (`<GridItem>`, `<BentoBoxGridItem>`), so a spread on the element just inside it reads as correct in the source. Check the built HTML: the element carrying `data-editable="array-item"` must be the outermost element that component emits.
 
 ### Rule: the namespace goes on the component that renders its own text
 

@@ -30,7 +30,7 @@ The agent should pick up skills automatically based on their trigger description
 
 ## Install as a Claude Code plugin
 
-If you use [Claude Code](https://claude.com/claude-code), you can install all seven skills as a plugin instead of copying them in. Add the marketplace, then install the plugin:
+If you use [Claude Code](https://claude.com/claude-code), you can install all nine skills as a plugin instead of copying them in. Add the marketplace, then install the plugin:
 
 ```
 /plugin marketplace add CloudCannon/agent-skills
@@ -60,10 +60,14 @@ The tooling is split across composable skills that can be used together or indep
 | `brainstorming`              | Structured design exploration | Exploring intent, requirements, and tradeoffs before implementation                           |
 | `make-site-multilingual`     | Rosey multilingual setup      | Making a site translatable with Rosey, plus the CloudCannon connector (RCC) editing layer     |
 | `translate-multilingual`     | AI translation                | Filling in or updating Rosey locale files and per-locale content directories                  |
+| `cloudcannon-dev-server`     | Local verification            | Checking work in the real Visual Editor — regions, inputs, edits reaching disk, RCC locales   |
+| `local-dev-servers`          | Dev server hygiene            | Starting a server on the port you meant, identifying what is on a port, and cleaning up       |
 
 For a full migration, start with `migrating-to-cloudcannon` -- it orchestrates the other skills at the right time. The standalone skills (`cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`) are useful when you only need one piece, e.g. "add visual editing to my existing CloudCannon site".
 
 The two multilingual skills sit outside the five-phase migration flow -- they apply to a site that is already on CloudCannon, or to one that never migrates. Use `make-site-multilingual` to set up Rosey, then `translate-multilingual` to fill in the translations.
+
+`cloudcannon-dev-server` also sits outside the phases, but applies during any of them: it drives CloudCannon's local dev server so an agent can check its own work in the real Visual Editor instead of handing every fidelity question to a human. `local-dev-servers` is its general-purpose counterpart -- not CloudCannon-specific at all, it covers starting any dev server on the port you actually intended and stopping it afterwards.
 
 ## How it works
 
@@ -94,6 +98,12 @@ skills/
     tagging.md                      # Phase 3 in full — data-rosey authoring rules
     troubleshooting.md              # Symptom-driven diagnosis
   translate-multilingual/           # AI translation of locale files and content (standalone)
+  cloudcannon-dev-server/           # Drive the local CloudCannon to verify work (standalone)
+    addressing.md                   # How to name a component on the page
+    scripts/                        # Build/serve, API probes, and the Visual Editor driver
+  local-dev-servers/                # Port discipline and cleanup for any dev server (standalone)
+    ports.md                        # Claiming a port, identity probes
+    cleanup.md                      # The registry, end-of-task cleanup, orphans
 ```
 
 ### Key conventions

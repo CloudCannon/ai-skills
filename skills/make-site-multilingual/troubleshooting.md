@@ -12,6 +12,7 @@ Symptom-driven diagnosis for a Rosey/RCC site. Preventative one-line rules live 
 | Page 2 of a paginated listing has a duplicate, untranslated copy of every key  | `data-rosey-root` derived from the computed URL, so `/blog/2/` became root `blog-2`         | Derive from the template's source identity — [tagging.md § 3e](tagging.md#3e-derive-the-root-from-the-templates-source-identity) |
 | Shared chrome produces `blog:pagination:next`, `about:pagination:next`, …      | `data-rosey-ns` on a shared component inside `<main>`, where `ns` appends to the page root  | Use `data-rosey-root` instead — [tagging.md § 3d](tagging.md#shared-chrome-inside-main-needs-its-own-root)                       |
 | A block loses its translation when an editor drags it to a different column    | `data-rosey-ns` on a structural wrapper, so the key encodes where the block sits            | Remove it — [tagging.md § 3g](tagging.md#rule-the-namespace-goes-on-the-component-that-renders-its-own-text)                     |
+| A block translates at `/{locale}/` but stays in the source language in the VE  | The array-item region sits inside its component instead of on its root                      | [Doubled namespace in the editor](#a-block-translates-on-the-built-site-but-not-in-the-visual-editor)                            |
 | `data-rosey-ns="undefined"` in the output; several items share one translation | Array items with no `_uuid` seeded                                                          | [Unseeded `_uuid`](#data-rosey-nsundefined-in-the-output)                                                                        |
 | Browser tab and search snippet stay in the default language                    | Untagged `<head>` text, which Rosey copies verbatim onto generated pages                    | Tag it — [tagging.md § 3h](tagging.md#head-title-and-meta-description)                                                           |
 | A split-by-directory post's translated title reverted to English               | The page was given head keys it must not have                                               | [Head keys on split pages](#a-split-by-directory-pages-translated-title-reverted-to-english)                                     |
@@ -61,6 +62,25 @@ With the key _untranslated_ Rosey leaves the existing text alone, so this stays 
 **Fix:** sanitise `.` to `_` in the key derivation ([tagging.md § 3f](tagging.md#sanitise-dots-out-of-derived-keys-rcc-layer)), rebuild, and re-run `rosey generate` + `write-locales`. Old dotted keys are orphaned and cleaned up automatically.
 
 **Common miss:** `data-rosey-attrs` (the comma-separated form) also emits dotted keys legitimately. If you see one, check whether it came from there before hunting for a derivation bug — and switch that element to `data-rosey-attrs-explicit`, which the skill requires.
+
+## A block translates on the built site but not in the Visual Editor
+
+**Cause:** the caller's `data-editable="array-item"` / `data-component` landed on an element **inside** the item component instead of on the root element it renders.
+
+**Why:** CloudCannon renders the component and diffs it against the region element's _children_, so a nested region receives a second copy of that component's root — `data-rosey-ns` included. Keys below it gain a duplicated segment (`…:<uuid>:<uuid>:heading`), match nothing in the locale files, and the connector falls back to source text. Rosey's build-time substitution never sees this DOM, which is why `/{locale}/` is correct.
+
+**Fix:** move the region attributes onto the component's outermost element ([tagging.md § 3g](tagging.md#rule-the-array-item-region-element-must-be-the-components-own-root-rcc-layer)). Keys don't change, so `base.json` and the locale files need no migration.
+
+**Verify in the Visual Editor console** — both must be 0:
+
+```js
+// an element whose nearest data-rosey-ns ancestor carries the same value
+[...document.querySelectorAll("[data-rosey-ns]")].filter(
+  (el) => el.parentElement?.closest("[data-rosey-ns]")?.dataset.roseyNs === el.dataset.roseyNs,
+).length;
+```
+
+**Common miss:** the visual result is subtle — the component's chrome renders twice (doubled padding or border), which reads as a styling quirk rather than a broken region.
 
 ## A markdown field is permanently stale and its formatting is uneditable
 

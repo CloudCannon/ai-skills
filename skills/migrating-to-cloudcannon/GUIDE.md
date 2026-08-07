@@ -19,12 +19,14 @@ The migration is split across four skills:
 
 ### Related standalone skills
 
-Two more skills live in this repo but are **not** part of the five-phase migration. They apply to a site already on CloudCannon, or to one that never migrates, and nothing in the migration phases delegates to them.
+Three more skills live in this repo but are **not** part of the five-phase migration. The two multilingual skills apply to a site already on CloudCannon, or to one that never migrates. `cloudcannon-dev-server` is different: it is not a phase, but it can be used during any of them to check work in the real Visual Editor.
 
 | Skill                    | Purpose                                                   | Read when                                                    |
 | ------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
 | `make-site-multilingual` | Rosey setup, `data-rosey` tagging, the RCC editing layer  | The site needs to be translatable                            |
 | `translate-multilingual` | AI translation of locale JSON and per-locale content dirs | Rosey is already set up and the locale files need filling in |
+| `cloudcannon-dev-server` | Driving the local CloudCannon to verify work              | You need to see what the Visual Editor actually rendered     |
+| `local-dev-servers`      | Port discipline and cleanup for any long-running process  | You are about to start a dev server or browser, or stop one  |
 
 ## File Map
 
@@ -78,6 +80,23 @@ hugo.md                                 Hugo-specific tagging and pipeline (part
 SKILL.md                                Entry point — locale JSON (Part 1), content dirs (Part 2)
 scripts/README.md                       Script inventory
 scripts/*.mjs                           prepare/merge for locale files and content
+
+── cloudcannon-dev-server (usable during any phase) ───────────
+SKILL.md                                Entry point — the verification ladder, Tier 0 → 2
+setup.md                                Prerequisites, build + serve, ports
+addressing.md                           Naming a component on the page
+driving-the-editor.md                   Frame model, routing, selector stability
+dev-server-api.md                       The /__api surface — checks with no browser
+rcc.md                                  RCC / multilingual checklist
+troubleshooting.md                      Symptom → cause
+reference.md                            Observed routes and DOM, with versions
+scripts/README.md                       Script inventory
+
+── local-dev-servers (usable during any phase) ────────────────
+SKILL.md                                Entry point — the three rules
+ports.md                                Claiming a port, identity probes
+cleanup.md                              Registry, end-of-task cleanup, orphans
+scripts/README.md                       Script inventory
 ```
 
 ## Reading Order Per Phase
@@ -141,6 +160,21 @@ Is the visual editor behaving unexpectedly?
 
 Is a page not loading in the visual editor?
 ├─ Yes → check cloudcannon-configuration/collection-urls.md § Troubleshooting
+└─ No  → skip
+
+Do you need to SEE what the visual editor rendered, rather than reason about it?
+├─ Yes → read cloudcannon-dev-server (drives the real editor locally)
+│        Is the question answerable from the build, a grep, or dist/?
+│        ├─ Yes → do that instead; the browser tier is ~30x slower
+│        └─ No  → cloudcannon-dev-server/SKILL.md § The verification ladder
+└─ No  → skip
+
+Are you about to start a dev server, preview server, or headless browser?
+├─ Yes → read local-dev-servers (claim the port you meant; clean up after)
+└─ No  → skip
+
+Is a port already in use, or did a server come up on an unexpected port?
+├─ Yes → local-dev-servers/ports.md — never fall back to another port
 └─ No  → skip
 
 Does the site need to serve more than one language?

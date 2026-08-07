@@ -146,13 +146,16 @@ All written to `.cloudcannon/migration/` (under `.cloudcannon/` so the CLI doesn
 
 ### Testing boundaries
 
-| Check                                                              | Owner |
-| ------------------------------------------------------------------ | ----- |
-| Local build (`npm run build` or whatever `package.json` defines)   | Agent |
-| Builds, greps, small scripts, `dist/` inspection                   | Agent |
-| Fidelity checks in CloudCannon (preview, inline edit, save-to-git) | Human |
+| Check                                                                    | Owner |
+| ------------------------------------------------------------------------ | ----- |
+| Local build (`npm run build` or whatever `package.json` defines)         | Agent |
+| Builds, greps, small scripts, `dist/` inspection                         | Agent |
+| Fidelity checks in the local CloudCannon (regions live, inputs, editing) | Agent |
+| Verification in the hosted site (real build, save-to-git, permissions)   | Human |
 
-Prefer asking the user to run CloudCannon verification over spinning up long-lived dev servers or heavy end-to-end testing in the agent session.
+Fidelity checks that used to be a handoff are now the agent's, because `cloudcannon dev` runs the real CloudCannon app against local files with no login. Use [cloudcannon-dev-server](../cloudcannon-dev-server/SKILL.md) rather than inventing a browser setup.
+
+**Still ask the user before reaching for the browser at all.** Prefer a build, a grep or `dist/` inspection when one answers the question -- the browser tier is roughly thirty times slower. And local CloudCannon is not the hosted environment: it has no real save-to-git and no build pipeline, so a human still confirms there.
 
 ### When to close with the user
 
