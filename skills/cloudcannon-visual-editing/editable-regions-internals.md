@@ -129,6 +129,7 @@ Slug paths use `.` as the separator: `"hero.title"` for `{ hero: { title: "X" } 
 ```typescript
 interface Dataset {
   items(): Promise<File | File[]>;
+  // Present, but change/delete DON'T fire here — attach to the File from items(). See Events note.
   addEventListener(event: "change" | "delete", listener: () => void): void;
 }
 interface Collection {
@@ -151,21 +152,39 @@ interface Collection {
 
 ### Text Editor
 
-| Quirk                                                            | Mitigation                                               |
-| ---------------------------------------------------------------- | -------------------------------------------------------- |
-| No `destroy()` — old instances fire `onChange` after DOM removal | Use a generation counter; stale closures check and no-op |
-| `onChange` fires on init (ProseMirror normalizes on mount)       | Guard with a `setupComplete` flag                        |
-| Editor starts empty — does not read `innerHTML`                  | Call `setContent(value)` immediately after creation      |
-| `setContent` resets cursor position                              | Track focus state; skip on focused editors               |
+| Quirk                                                            | Mitigation                                                     |
+| ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| No `destroy()` — old instances fire `onChange` after DOM removal | Use a generation counter; stale closures check and no-op       |
+| `onChange` fires on init (ProseMirror normalizes on mount)       | Guard with a `setupComplete` flag                              |
+| Editor starts empty — does not read `innerHTML`                  | Call `setContent(value)` immediately after creation            |
+| `setContent` resets cursor position                              | Track focus state; skip on focused editors                     |
+| Mounting shifts layout — schema reflows the content              | Neutralize the reflow in CSS, don't chase pixel parity (below) |
+
+### Layout shift when a static region becomes an editor
+
+Mounting an editor on a region that was static (e.g. switching a page into edit mode, or a locale connector swapping in editable content) visibly shifts spacing. The editor **box itself is neutral** — `createTextEditableRegion` adds no padding/margin/border of its own — so the shift comes from ProseMirror **reflowing the content to match its schema**, not from a wrapper.
+
+The common culprits:
+
+- **Tight lists go loose.** Static markdown renders a tight list as `<li>text</li>`; ProseMirror re-wraps each item as `<li><p>text</p></li>`, and the injected `<p>` picks up the default paragraph margin. This pushes list items apart — usually the most obvious jump.
+- **Images become widgets.** An inline `<img>` is replaced by CC's image editor (a large panel with a caption card). This is inherent — the editor genuinely opens an image UI — and can't be neutralized to an inline image.
+- **`white-space` changes** to `break-spaces` on the editor root (ProseMirror needs it for editing).
+
+Guidance:
+
+- **Confirm the box is neutral first.** Diff the region's computed styles (padding, margin, border, display) static-vs-mounted before assuming a wrapper is at fault — usually it isn't, and the fix belongs on the _reflowed children_, not the region.
+- **Minimize, don't eliminate.** Some shift is inherent (the image widget). Kill the obvious stray margins; don't chase pixel parity with the static render.
+- **Neutralize without `!important`.** For loose lists, zero the wrapper margin — `:is(li, dd, dt) > p { margin-block: 0 }` — scoped to the editor subtree. The margin being cancelled is the UA default (or a low-specificity `p` rule), which a plain selector already outranks, so it wins where it should while yielding to a site that _deliberately_ styles loose lists with a higher-specificity or `!important` rule. An unconditional `!important` would steamroll that intent.
 
 ### Data API
 
-| Quirk                                | Detail                                                |
-| ------------------------------------ | ----------------------------------------------------- |
-| Slug separator is `.` not `/`        | `"hero.title"` for `{ hero: { title: "X" } }`         |
-| `dataset.items()` return type varies | Can return `File` or `File[]` — always handle both    |
-| `change` events are coarse           | Doesn't indicate which key changed — re-read all keys |
-| `change` fires for own writes        | Guard against echo loops                              |
+| Quirk                                                 | Detail                                                                                                              |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Slug separator is `.` not `/`                         | `"hero.title"` for `{ hero: { title: "X" } }`                                                                       |
+| `dataset.items()` return type varies                  | Can return `File` or `File[]` — always handle both                                                                  |
+| `change` events are coarse                            | Doesn't indicate which key changed — re-read all keys                                                               |
+| `change` fires for own writes                         | Guard against echo loops                                                                                            |
+| `change`/`delete` fire on the `File`, not the dataset | Attach to the file from `items()`; the dataset handle receives nothing (this breaks Clear/Discard). See Events note |
 
 ### DOM and Content
 
@@ -177,13 +196,23 @@ interface Collection {
 
 ### Events
 
-| Event                              | Fired On                  | When                                |
-| ---------------------------------- | ------------------------- | ----------------------------------- |
-| `cloudcannon:load`                 | `document`                | CloudCannon API is ready            |
-| `change`                           | File, Collection, Dataset | Data changed (including own writes) |
-| `delete`                           | File, Collection, Dataset | Data deleted                        |
-| `cloudcannon-api`                  | DOM elements (bubbles)    | Internal editable regions event bus |
-| `editable:focus` / `editable:blur` | DOM elements (bubbles)    | Focus state changes                 |
+| Event                              | Fired On               | When                                |
+| ---------------------------------- | ---------------------- | ----------------------------------- |
+| `cloudcannon:load`                 | `document`             | CloudCannon API is ready            |
+| `change`                           | **File** (see note)    | Data changed (including own writes) |
+| `delete`                           | **File** (see note)    | Data deleted (incl. Clear/Discard)  |
+| `cloudcannon-api`                  | DOM elements (bubbles) | Internal editable regions event bus |
+| `editable:focus` / `editable:blur` | DOM elements (bubbles) | Focus state changes                 |
+
+> **Note — `change`/`delete` fire on the `File`, not the `Dataset`/`Collection` handle.**
+> Even though `Dataset`/`Collection` expose `addEventListener`, the events fire on the
+> **`File`** you get back from `items()` — not on the dataset/collection object. Listening
+> on the dataset handle silently receives nothing (verified live). Always attach to the
+> resolved file: `const file = (await dataset.items())[0]; file.addEventListener("delete", …)`.
+> This is the mechanism behind Clear/Discard: a discard emits `delete` on the file with the
+> reverted value, so a listener there can re-pull and revert the editors. Miss it and discard
+> appears to do nothing on plain regions (component regions may hide it — the host re-renders
+> them from the reverted data regardless).
 
 ### Global State
 

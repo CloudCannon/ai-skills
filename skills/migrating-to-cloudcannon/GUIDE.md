@@ -17,6 +17,15 @@ The migration is split across four skills:
 | `cloudcannon-snippets`       | Snippet config for MDX components and inline HTML               | Yes — "add snippets to my CC site"       |
 | `cloudcannon-visual-editing` | Editable regions, Visual Editor setup                           | Yes — "add visual editing to my CC site" |
 
+### Related standalone skills
+
+Two more skills live in this repo but are **not** part of the five-phase migration. They apply to a site already on CloudCannon, or to one that never migrates, and nothing in the migration phases delegates to them.
+
+| Skill                    | Purpose                                                   | Read when                                                    |
+| ------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
+| `make-site-multilingual` | Rosey setup, `data-rosey` tagging, the RCC editing layer  | The site needs to be translatable                            |
+| `translate-multilingual` | AI translation of locale JSON and per-locale content dirs | Rosey is already set up and the locale files need filling in |
+
 ## File Map
 
 ```
@@ -56,6 +65,19 @@ editable-regions-internals.md           ON DEMAND — lifecycle trace, JS API, q
 astro/visual-editing.md                 Phase 4: workflow, census, checklists
 astro/visual-editing-reference.md       Phase 4: pattern reference (read on demand)
 scripts/setup-editable-regions.sh       Installs package, wires Astro integration
+
+── make-site-multilingual (outside the migration phases) ──────
+SKILL.md                                Entry point — the 9 phases, RCC layer, gotchas, v1→v2 upgrade
+tagging.md                              Phase 3 in full — every data-rosey/-ns/-root authoring rule
+troubleshooting.md                      Symptom → cause → fix for builds that translate wrongly
+astro.md                                Astro-specific: root derivation, head/SEO, taxonomy routes
+eleventy.md                             Eleventy-specific tagging, taxonomy scoping, link localization
+hugo.md                                 Hugo-specific tagging and pipeline (partial — see its coverage note)
+
+── translate-multilingual (outside the migration phases) ──────
+SKILL.md                                Entry point — locale JSON (Part 1), content dirs (Part 2)
+scripts/README.md                       Script inventory
+scripts/*.mjs                           prepare/merge for locale files and content
 ```
 
 ## Reading Order Per Phase
@@ -120,6 +142,13 @@ Is the visual editor behaving unexpectedly?
 Is a page not loading in the visual editor?
 ├─ Yes → check cloudcannon-configuration/collection-urls.md § Troubleshooting
 └─ No  → skip
+
+Does the site need to serve more than one language?
+├─ Yes → read make-site-multilingual (independent of the migration phases)
+│        Are there locale files or per-locale content dirs to fill in?
+│        ├─ Yes → translate-multilingual
+│        └─ No  → finish the Rosey setup first
+└─ No  → skip both multilingual skills
 ```
 
 ## Maintainers: extending these skills

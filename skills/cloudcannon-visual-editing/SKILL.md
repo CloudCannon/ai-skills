@@ -38,6 +38,12 @@ description: >-
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | [scripts/setup-editable-regions.sh](scripts/setup-editable-regions.sh) | Installs package, wires Astro integration, creates `registerComponents.ts` stub |
 
+**Other skills:**
+
+| Skill                                                        | When to read                                                                                                                                                    |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [make-site-multilingual](../make-site-multilingual/SKILL.md) | The site is multilingual. Translation keys (`data-rosey`) must sit on region hosts rather than inside them, and component regions need explicit key passthrough |
+
 ## Quick reference
 
 | Region type  | Use for                     | Key attributes                                                           |

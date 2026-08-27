@@ -30,7 +30,7 @@ The agent should pick up skills automatically based on their trigger description
 
 ## Install as a Claude Code plugin
 
-If you use [Claude Code](https://claude.com/claude-code), you can install all five skills as a plugin instead of copying them in. Add the marketplace, then install the plugin:
+If you use [Claude Code](https://claude.com/claude-code), you can install all seven skills as a plugin instead of copying them in. Add the marketplace, then install the plugin:
 
 ```
 /plugin marketplace add CloudCannon/agent-skills
@@ -58,8 +58,12 @@ The tooling is split across composable skills that can be used together or indep
 | `cloudcannon-snippets`       | Snippet configuration         | Configuring MDX components or inline HTML for CloudCannon's Content Editor                    |
 | `cloudcannon-visual-editing` | Visual Editor support         | Adding editable regions so page content can be edited inline in CloudCannon's Visual Editor   |
 | `brainstorming`              | Structured design exploration | Exploring intent, requirements, and tradeoffs before implementation                           |
+| `make-site-multilingual`     | Rosey multilingual setup      | Making a site translatable with Rosey, plus the CloudCannon connector (RCC) editing layer     |
+| `translate-multilingual`     | AI translation                | Filling in or updating Rosey locale files and per-locale content directories                  |
 
 For a full migration, start with `migrating-to-cloudcannon` -- it orchestrates the other skills at the right time. The standalone skills (`cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`) are useful when you only need one piece, e.g. "add visual editing to my existing CloudCannon site".
+
+The two multilingual skills sit outside the five-phase migration flow -- they apply to a site that is already on CloudCannon, or to one that never migrates. Use `make-site-multilingual` to set up Rosey, then `translate-multilingual` to fill in the translations.
 
 ## How it works
 
@@ -86,6 +90,10 @@ skills/
   cloudcannon-snippets/             # Snippets skill (standalone)
   cloudcannon-visual-editing/       # Visual editing skill (standalone)
   brainstorming/                    # Design exploration skill
+  make-site-multilingual/           # Rosey + RCC setup (standalone, outside the migration phases)
+    tagging.md                      # Phase 3 in full — data-rosey authoring rules
+    troubleshooting.md              # Symptom-driven diagnosis
+  translate-multilingual/           # AI translation of locale files and content (standalone)
 ```
 
 ### Key conventions
