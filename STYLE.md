@@ -61,6 +61,31 @@ Canonical example: `cloudcannon-configuration/collection-urls.md` owns placehold
 
 **Why:** `SKILL.md` is matched against the user's request before anything else is read. Skills here share vocabulary — configure, collection, content, build — so anti-triggers are the cheapest defence against routing to the wrong skill, and they only work if every skill carries them.
 
+### Adding a new SSG
+
+**MUST:** work through this list. Adding an SSG touches five skills; doing it ad hoc is how coverage ends up uneven without anyone noticing.
+
+| Skill                        | Needs a `<ssg>/` directory?                     | Files                                                                       |
+| ---------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------- |
+| `migrate-to-cloudcannon`     | Yes — the phase guides are SSG-specific         | `overview.md`, `audit.md`, `content.md`, `build.md`, `page-building.md`     |
+| `cloudcannon-configuration`  | Yes — schema and URL derivation differ          | `overview.md`, `configuration.md`, `collection-urls.md`, `<ssg>-gotchas.md` |
+| `cloudcannon-visual-editing` | Yes — component re-rendering is framework-bound | `overview.md`, `visual-editing.md`, `visual-editing-reference.md`           |
+| `cloudcannon-snippets`       | Only if the SSG has its own component syntax    | `overview.md`                                                               |
+| `make-site-multilingual`     | Yes — root derivation and the pipeline differ   | `overview.md`                                                               |
+| `translate-site`             | No — it operates on files, not templates        | —                                                                           |
+| `brainstorming`              | No                                              | —                                                                           |
+
+Then:
+
+- Add a row to the SSG detection table in each affected `SKILL.md`
+- Add a row to the coverage matrix in [README.md](README.md)
+- Add the file lines to the file map in [ARCHITECTURE.md](ARCHITECTURE.md)
+- Run `npm run check`
+
+**Partial coverage is allowed, silent partial coverage is not.** If an SSG directory does not yet cover the whole workflow, say so in a coverage note at the top of its `overview.md` and mark it Partial in the README matrix.
+
+**Why:** the first SSG after Astro is the one that proves whether a rule in a base file was ever really generic. Expect to move rules up out of `astro/` as you go — that is the axis working, not a mistake.
+
 ## Writing style
 
 ### Core rules

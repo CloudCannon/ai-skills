@@ -80,6 +80,7 @@ hugo/overview.md                        Hugo: tagging and pipeline (partial — 
 ── cloudcannon-configuration (capability) ────────────────────
 SKILL.md                                ENTRY POINT — the schema gate, invalid keys, symptoms
 json-schemas.md                         Querying the authoritative schemas
+troubleshooting.md                      Symptom → fix, when configuration is already wrong
 cloudcannon-cli-guide.md                CloudCannon CLI commands and options
 structures.md                           Inline vs split, previews, field completeness
 collection-urls.md                      URL patterns — placeholders, trailing slash, troubleshooting
@@ -94,13 +95,15 @@ snippets.md                             Concepts — config patterns, raw HTML s
 template-based.md                       Template-based snippet workflow
 raw.md                                  Raw snippet syntax, all parser types
 built-in-templates.md                   MDX templates vs import bundle, parser internals
-gotchas.md                              Snippet pitfalls and debugging
+gotchas.md                              Preventative rules — pitfalls and workarounds
+troubleshooting.md                      Symptom index, routing to the rule that owns each fix
 astro/overview.md                       ENTRY POINT for Astro — MDX stack, auto-import
 
 ── cloudcannon-visual-editing (capability) ───────────────────
 SKILL.md                                ENTRY POINT — region types, workflow, checklist
 editable-regions.md                     Region types, attribute reference, decision tree
 editable-regions-internals.md           ON DEMAND — lifecycle trace, JS API, quirks
+troubleshooting.md                      Symptom → fix, when regions misbehave
 astro/overview.md                       ENTRY POINT for Astro — reading order
 astro/visual-editing.md                 Phase 4: workflow, census, checklists
 astro/visual-editing-reference.md       ON DEMAND — pattern reference, do not read front to back
@@ -122,8 +125,8 @@ SKILL.md                                Single file — design dialogue, then ha
 
 **New shell script** — put it in the relevant skill's `scripts/` directory, document it in that skill's `scripts/README.md`, and reference it from the phase doc that runs it.
 
-**New SSG** — add a `<ssg>/` directory with an `overview.md` in every skill that needs SSG-specific content, and update the coverage matrix in the [README](README.md). Never create a skill named after an SSG.
+**New SSG** — follow the checklist in [STYLE.md § Adding a new SSG](STYLE.md#adding-a-new-ssg). Never create a skill named after an SSG.
 
-**New skill** — pick its tier first (journey, capability, or operation); the tier fixes the name and the entry shape. Add it to the tier tables above and to the README.
+**New skill** — pick its tier first (journey, capability, or operation); the tier fixes the name and the entry shape. Start from a skeleton in [templates/](templates/), then add it to the tier tables above and to the README.
 
 **Every change** — `npm run check` must pass. It verifies formatting, that every relative link and `#anchor` resolves, and that each `SKILL.md`'s frontmatter `name` matches its directory.

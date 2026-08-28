@@ -135,7 +135,14 @@ let anchorCount = 0;
 const report = (file, line, message) =>
   errors.push(`${relative(ROOT, file)}:${line}  ${message}`);
 
+// Skeletons under templates/ describe the directory they will be copied INTO,
+// so their sibling links (troubleshooting.md, astro/overview.md) do not resolve
+// here by design. templates/README.md is checked normally.
+const isSkeleton = (f) =>
+  relative(ROOT, f).startsWith("templates/") && basename(f).endsWith("-SKILL.md");
+
 for (const file of files) {
+  if (isSkeleton(file)) continue;
   const lines = stripFences(readFileSync(file, "utf8").split("\n"));
 
   lines.forEach((raw, i) => {
@@ -144,6 +151,10 @@ for (const file of files) {
 
     for (const [, target] of line.matchAll(/\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
       if (/^(https?:|mailto:|tel:|data:)/i.test(target)) continue;
+
+      // `<placeholder>` targets in templates/ are skeletons to be filled in,
+      // not paths. No real path contains angle brackets.
+      if (/[<>]/.test(target)) continue;
 
       const [path, anchor] = target.split("#");
       linkCount++;
@@ -180,7 +191,7 @@ for (const file of files) {
 }
 
 // SKILL.md frontmatter contract
-const skillFiles = files.filter((f) => basename(f) === "SKILL.md");
+const skillFiles = files.filter((f) => basename(f) === "SKILL.md" && !isSkeleton(f));
 
 for (const file of skillFiles) {
   const fm = frontmatter(file);

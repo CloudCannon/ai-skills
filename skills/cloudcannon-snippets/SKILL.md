@@ -31,7 +31,8 @@ Snippets let editors insert and edit complex markup (components, shortcodes, emb
 | [template-based.md](template-based.md)         | Component syntax matches a built-in template (most common path)                                                                                          |
 | [raw.md](raw.md)                               | Component needs custom syntax (e.g. `client:load`, non-standard attributes)                                                                              |
 | [built-in-templates.md](built-in-templates.md) | Understanding built-in MDX templates, the import bundle, parser internals                                                                                |
-| [gotchas.md](gotchas.md)                       | Debugging or reviewing. Common pitfalls and workarounds                                                                                                  |
+| [gotchas.md](gotchas.md)                       | Preventative rules — the pitfalls and their workarounds                                                                                                  |
+| [troubleshooting.md](troubleshooting.md)       | Symptom index — start here when something is already broken, it routes to the rule                                                                       |
 
 **SSG-specific:**
 
