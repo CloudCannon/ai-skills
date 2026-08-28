@@ -4,12 +4,12 @@
     "name": "CloudCannon",
     "email": "support@cloudcannon.com"
   },
-  "description": "CloudCannon agent skills for migrating SSG sites to CloudCannon, configuring visual editing, and making sites multilingual with Rosey.",
+  "description": "CloudCannon agent skills for migrating SSG sites onto CloudCannon, configuring and maintaining them, and making them multilingual with Rosey.",
   "plugins": [
     {
       "name": "agent-skills",
       "source": ".",
-      "description": "Skills that help AI coding agents migrate SSG sites to CloudCannon \u2014 site configuration, visual editing, snippets, multilingual setup with Rosey, and a guided end-to-end migration workflow.",
+      "description": "Agent skills for CloudCannon sites: migrating an SSG site onto CloudCannon, configuration, visual editing, snippets, multilingual setup with Rosey, and AI translation.",
       "version": "0.2.0"
     }
   ]

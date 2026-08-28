@@ -32,7 +32,7 @@ This skill orchestrates a full migration of an existing SSG site to CloudCannon.
 | [astro/overview.md](astro/overview.md) | **Start here for Astro** — the per-phase guides                         |
 | [chunking.md](chunking.md)             | Splitting a large migration across several conversations                |
 | [handoff.md](handoff.md)               | Closing with the user — who tests what, and what to ask back            |
-| [GUIDE.md](GUIDE.md)                   | Human orientation — file map, reading order per phase, decision tree    |
+| [reading-order.md](reading-order.md)   | Which docs to read in which phase, and when to skip them                |
 | [scripts/README.md](scripts/README.md) | Automation scripts for the deterministic steps                          |
 
 ## Supported SSGs

@@ -1,117 +1,117 @@
 # CloudCannon Agent Skills
 
-Agent skills that help AI coding agents migrate existing SSG sites to [CloudCannon](https://cloudcannon.com). Copy the skills into your project, open it in your AI coding agent, and ask it to migrate your site.
+Agent skills for working with [CloudCannon](https://cloudcannon.com) sites: migrating an existing SSG site onto CloudCannon, configuring it, adding visual editing and snippets, making it multilingual, and maintaining it afterwards. Add the skills to your project, open it in your AI coding agent, and ask.
 
 ## Prerequisites
 
 - An AI coding agent that supports skills (e.g. an agent mode in your IDE)
-- An existing SSG site (see [supported SSGs](#supported-ssgs))
-- A [CloudCannon](https://cloudcannon.com) account (for final verification)
+- An SSG site — see [SSG coverage](#ssg-coverage)
+- A [CloudCannon](https://cloudcannon.com) account, for the parts a human has to verify
 
 ## Getting started
 
 1. Run `npx skills add CloudCannon/agent-skills` in the root of your project
 2. Open your project in your AI coding agent
-3. Ask the agent to migrate your site to CloudCannon, following a suggested prompt:
-
-   For a full migration:
+3. Ask for what you want. Agents pick up skills automatically from the trigger descriptions in each `SKILL.md`, so plain requests usually work — but naming the skill removes any ambiguity:
 
    > Migrate this site to CloudCannon using the migrate-to-cloudcannon skill. If the skill is not found, look in .agents/, otherwise do not continue.
 
-   Or, for creating configuration:
-
    > Create CloudCannon configuration files using the cloudcannon-configuration skill. If the skill is not found, look in .agents/, otherwise do not continue.
-
-   Or, for setting up Visual Editing:
 
    > Configure Visual Editing for CloudCannon using the cloudcannon-visual-editing skill. If the skill is not found, look in .agents/, otherwise do not continue.
 
-The agent should pick up skills automatically based on their trigger descriptions in `SKILL.md`.
-
 ## Install as a Claude Code plugin
 
-If you use [Claude Code](https://claude.com/claude-code), you can install all seven skills as a plugin instead of copying them in. Add the marketplace, then install the plugin:
+If you use [Claude Code](https://claude.com/claude-code), you can install the skills as a plugin instead of copying them in. Add the marketplace, then install the plugin:
 
 ```
 /plugin marketplace add CloudCannon/agent-skills
 /plugin install agent-skills@cloudcannon
 ```
 
-The skills are then available namespaced as `agent-skills:<skill-name>` (e.g. `agent-skills:migrate-to-cloudcannon`), and Claude picks them up automatically based on their trigger descriptions — same as the copy-in route above.
-
-## Supported SSGs
-
-| SSG   | Status    |
-| ----- | --------- |
-| Astro | Supported |
-
-More SSGs are planned. Each SSG has its own directory within the relevant skills containing SSG-specific guidance.
+The skills are then available namespaced as `agent-skills:<skill-name>` (e.g. `agent-skills:migrate-to-cloudcannon`), and Claude picks them up automatically from their trigger descriptions — same as the copy-in route above.
 
 ## Available skills
 
-The tooling is split across composable skills that can be used together or independently.
+Skills come in three tiers. The tier tells you how long the skill runs and whether it expects a site that already works.
 
-| Skill                        | Purpose                       | When to use                                                                                   |
-| ---------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------- |
-| `migrate-to-cloudcannon`     | Full migration orchestrator   | Migrating a site to CloudCannon end-to-end (audit, configure, content, visual editing, build) |
-| `cloudcannon-configuration`  | CloudCannon config setup      | Setting up `cloudcannon.config.yml`, collections, inputs, structures, or the CloudCannon CLI  |
-| `cloudcannon-snippets`       | Snippet configuration         | Configuring MDX components or inline HTML for CloudCannon's Content Editor                    |
-| `cloudcannon-visual-editing` | Visual Editor support         | Adding editable regions so page content can be edited inline in CloudCannon's Visual Editor   |
-| `brainstorming`              | Structured design exploration | Exploring intent, requirements, and tradeoffs before implementation                           |
-| `make-site-multilingual`     | Rosey multilingual setup      | Making a site translatable with Rosey, plus the CloudCannon connector (RCC) editing layer     |
-| `translate-site`             | AI translation                | Filling in or updating Rosey locale files and per-locale content directories                  |
+### Journeys — run once against a site, multi-phase
 
-For a full migration, start with `migrate-to-cloudcannon` -- it orchestrates the other skills at the right time. The standalone skills (`cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`) are useful when you only need one piece, e.g. "add visual editing to my existing CloudCannon site".
+| Skill                    | When to use                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `migrate-to-cloudcannon` | Migrating a site to CloudCannon end to end — audit, configure, content, editing, build |
+| `make-site-multilingual` | Making a site translatable with Rosey, plus the optional CloudCannon connector (RCC)   |
 
-The two multilingual skills sit outside the five-phase migration flow -- they apply to a site that is already on CloudCannon, or to one that never migrates. Use `make-site-multilingual` to set up Rosey, then `translate-site` to fill in the translations.
+### Capabilities — one CloudCannon feature each
 
-## How it works
+Entered directly when you only need one piece ("add visual editing to my existing site"), or delegated to by a journey at the right phase.
 
-A full migration runs through five phases:
+| Skill                        | When to use                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures, collection URLs, the CLI |
+| `cloudcannon-snippets`       | MDX components or inline HTML in CloudCannon's Content Editor                       |
+| `cloudcannon-visual-editing` | Editable regions, so page content can be edited inline in the Visual Editor         |
 
-1. **Audit** -- Analyze the site's content structure, components, routing, and build pipeline
-2. **Configuration** -- Generate and customize CloudCannon config files (delegates to `cloudcannon-configuration` and optionally `cloudcannon-snippets`)
-3. **Content** -- Restructure content files if needed so they're CMS-friendly
-4. **Visual editing** -- Add editable regions for inline editing in CloudCannon's Visual Editor (delegates to `cloudcannon-visual-editing`)
-5. **Build and test** -- Validate the migration works end-to-end
+### Operations — short tasks on a site that already works
 
-Each phase has a verification checklist. The agent reads docs just-in-time during each phase rather than front-loading everything. Deterministic steps are automated as scripts to save tokens and improve consistency.
+| Skill            | When to use                                                                  |
+| ---------------- | ---------------------------------------------------------------------------- |
+| `translate-site` | Filling in or updating Rosey locale files and per-locale content directories |
+| `brainstorming`  | A CloudCannon request with more than one sensible answer, before building it |
+
+Not sure where to start? [ARCHITECTURE.md](ARCHITECTURE.md#which-skill-do-i-start-in) has a router.
+
+## SSG coverage
+
+Coverage is per skill: a skill supports an SSG once it has a `<ssg>/` directory covering that SSG's differences.
+
+| Skill                        | Astro | Eleventy | Hugo    |
+| ---------------------------- | ----- | -------- | ------- |
+| `migrate-to-cloudcannon`     | Yes   | —        | —       |
+| `make-site-multilingual`     | Yes   | Yes      | Partial |
+| `cloudcannon-configuration`  | Yes   | —        | —       |
+| `cloudcannon-snippets`       | Yes   | —        | —       |
+| `cloudcannon-visual-editing` | Yes   | —        | —       |
+
+`translate-site` and `brainstorming` are SSG-agnostic — they work the same everywhere and have no SSG directories.
+
+"Partial" means the SSG directory exists but does not yet cover the whole workflow; each such file carries its own coverage note. More SSGs are planned — each gets a `<ssg>/` directory inside the skills that need one, never a skill of its own.
+
+## How a migration works
+
+`migrate-to-cloudcannon` runs five phases:
+
+1. **Audit** — analyse the site's content structure, components, routing, and build pipeline
+2. **Configuration** — generate and customize CloudCannon config files (delegates to `cloudcannon-configuration`, and to `cloudcannon-snippets` if content has MDX components or inline HTML)
+3. **Content** — restructure content files if needed so they are CMS-friendly
+4. **Visual editing** — add editable regions for inline editing (delegates to `cloudcannon-visual-editing`)
+5. **Build and test** — validate the migration end to end
+
+Each phase has a verification checklist. The agent reads docs just-in-time during each phase rather than front-loading everything, and deterministic steps run as scripts to save tokens and improve consistency.
 
 Not every site needs all phases. Small sites may skip content restructuring. Visual editing is optional but high-value.
 
+The other journey, `make-site-multilingual`, is independent of these phases — it applies to a site already on CloudCannon, or to one that never migrates.
+
 ## Contributing
 
-### Repo structure
-
-```
-skills/
-  migrate-to-cloudcannon/         # Migration orchestrator
-  cloudcannon-configuration/        # Config skill (standalone)
-  cloudcannon-snippets/             # Snippets skill (standalone)
-  cloudcannon-visual-editing/       # Visual editing skill (standalone)
-  brainstorming/                    # Design exploration skill
-  make-site-multilingual/           # Rosey + RCC setup (standalone, outside the migration phases)
-    tagging.md                      # Phase 3 in full — data-rosey authoring rules
-    troubleshooting.md              # Symptom-driven diagnosis
-  translate-site/           # AI translation of locale files and content (standalone)
-```
+[ARCHITECTURE.md](ARCHITECTURE.md) is the map: the tiers, the full file map, and where a new file belongs. [STYLE.md](STYLE.md) is the law: the architectural invariants and the writing rules.
 
 ### Key conventions
 
-- **Living documents** -- Skills are actively maintained. When an agent uncovers a new pattern or edge case during a migration, update the relevant skill as part of the same task rather than leaving it as a follow-up.
-- **Just-in-time reading** -- Agents read docs as needed during each phase rather than loading everything upfront. The skills are structured to support this.
-- **Architecture and writing style** -- [STYLE.md](STYLE.md) governs both: where a file goes (skills are concerns, SSGs are subdirectories, every skill has a tier) and what goes in it (front-load rules, prefer tables and checklists over prose, one canonical source per rule).
-
-For a detailed walkthrough of how agents traverse the skill files, see [GUIDE.md](skills/migrate-to-cloudcannon/GUIDE.md).
+- **Concerns are skills, SSGs are subdirectories** — a skill owns one concern for every SSG; `<ssg>/` holds only what differs. Never a skill named after an SSG.
+- **Living documents** — skills are actively maintained. When an agent uncovers a new pattern or edge case during a migration, update the relevant skill as part of the same task rather than leaving it as a follow-up.
+- **Just-in-time reading** — agents read docs as needed during each phase rather than loading everything upfront. The skills are structured to support this.
+- **One canonical source per rule** — if a rule appears in two files, one owns it and the other links.
 
 ### Development
 
-Markdown files are formatted with [Prettier](https://prettier.io). CI runs `prettier --check` on every pull request and fails if anything is unformatted.
-
 ```sh
-npm install           # one-time: install dev dependencies
-npm run format        # format all markdown files in place
-npm run format:check  # preview what CI will check (no changes written)
+npm install     # one-time: install dev dependencies
+npm run check   # everything CI runs
+npm run format  # format all markdown files in place
 ```
 
-Run `npm run format` before committing changes to any markdown file.
+`npm run check` is formatting plus `scripts/check-links.mjs`, which verifies that every relative link and every `#anchor` resolves, and that each `SKILL.md`'s frontmatter `name` matches its directory. CI runs both on every pull request.
+
+Anchors are the easy thing to break: most internal links point at a specific heading, so rewording a heading silently orphans every link to it. Run `npm run check` before committing.

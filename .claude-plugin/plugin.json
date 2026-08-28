@@ -1,6 +1,6 @@
 {
   "name": "agent-skills",
-  "description": "Skills that help AI coding agents migrate SSG sites to CloudCannon \u2014 site configuration, visual editing, snippets, multilingual setup with Rosey, and a guided end-to-end migration workflow.",
+  "description": "Agent skills for CloudCannon sites: migrating an SSG site onto CloudCannon, configuration, visual editing, snippets, multilingual setup with Rosey, and AI translation.",
   "version": "0.2.0",
   "author": {
     "name": "CloudCannon",
@@ -13,11 +13,13 @@
     "ssg",
     "migration",
     "visual-editing",
+    "snippets",
     "astro",
     "cms",
     "multilingual",
     "i18n",
     "rosey",
-    "translation"
+    "translation",
+    "static-site-generator"
   ]
 }
