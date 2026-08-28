@@ -62,6 +62,25 @@ The app boots, fetches, and injects, so there is a long window where the site
 frame exists but is empty. Waiting for the frame alone is not enough — wait for
 it to have children, which is what `waitForSiteFrame()` does.
 
+**Regions appearing is not the same as the region set being final.** On a site
+with client-side hydration the server-rendered markup is bound first, then the
+islands hydrate and rebuild their DOM. Measured on an Astro page here, the count
+went **122 → 94 roughly 800ms after the first regions appeared** — so anything
+reading the page in that window sees addresses that are about to stop existing.
+`waitForSiteFrame()` therefore waits for the count to hold still for 2s before
+returning, and reports the settled count to `ve-open.mjs`.
+
+Two things this rules out, both checked rather than assumed:
+
+- `document.readyState` is no help. It reaches `complete` about 300ms _before_
+  the drop.
+- There is no event to wait on. CloudCannon does not re-run
+  `hydrateDataEditableRegions` when the islands rebuild — the regions that
+  vanish are simply removed.
+
+The settled count is stamped on the frame's `window`, which a navigation clears,
+so `ve-open.mjs` pays the 2s and the scripts that follow it do not.
+
 Rough timings, headed, on a small site:
 
 | Step                                | Time            |

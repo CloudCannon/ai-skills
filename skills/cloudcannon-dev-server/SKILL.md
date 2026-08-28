@@ -57,6 +57,8 @@ Climb only as far as the question needs. Each rung costs more than the last.
 **Why:** `cloudcannon dev` serves an output directory but never builds it. The
 most common way to lose a session is inspecting a build from before the change
 under test — and nothing on screen says so.
+Run it from the site directory, or pass `--root <site>`; from anywhere else it
+cannot resolve the source files and reports `UNKNOWN` rather than a verdict.
 
 **This skill starts two long-lived processes** — the dev server on 10101 and
 Chrome on 9222. Both must be stopped when the task ends, and neither may quietly
@@ -92,16 +94,16 @@ node scripts/browser.mjs stop
 
 ## Contents
 
-| File                                           | Covers                                                                                                |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [setup.md](setup.md)                           | Prerequisites, build + serve per SSG, ports, what `cloudcannon dev` does and does not do              |
-| [addressing.md](addressing.md)                 | How to name a component on the page — the address forms, and why nesting never has to be hand-derived |
-| [driving-the-editor.md](driving-the-editor.md) | The frame model, routing, waits, and which selectors are safe to depend on                            |
-| [dev-server-api.md](dev-server-api.md)         | The `/__api` surface — everything checkable without a browser                                         |
-| [rcc.md](rcc.md)                               | The RCC / multilingual checklist                                                                      |
-| [troubleshooting.md](troubleshooting.md)       | Symptom → cause                                                                                       |
-| [reference.md](reference.md)                   | Observed routes, selectors and DOM shapes, with the versions they were seen on                        |
-| [scripts/README.md](scripts/README.md)         | Every script and its flags                                                                            |
+| File                                           | Covers                                                                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [setup.md](setup.md)                           | Prerequisites, build + serve per SSG, ports, running in a container, what `cloudcannon dev` does and does not do |
+| [addressing.md](addressing.md)                 | How to name a component on the page — the address forms, and why nesting never has to be hand-derived            |
+| [driving-the-editor.md](driving-the-editor.md) | The frame model, routing, waits, and which selectors are safe to depend on                                       |
+| [dev-server-api.md](dev-server-api.md)         | The `/__api` surface — everything checkable without a browser                                                    |
+| [rcc.md](rcc.md)                               | The RCC / multilingual checklist                                                                                 |
+| [troubleshooting.md](troubleshooting.md)       | Symptom → cause                                                                                                  |
+| [reference.md](reference.md)                   | Observed routes, selectors and DOM shapes, with the versions they were seen on                                   |
+| [scripts/README.md](scripts/README.md)         | Every script and its flags                                                                                       |
 
 ## Scripts
 
@@ -114,7 +116,7 @@ project — adjust the path to wherever this skill's `scripts/` actually sits.
 | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [cc-serve.sh](scripts/cc-serve.sh)                                                | Build, run `.cloudcannon/postbuild`, start the dev server                     |
 | [dev-status.mjs](scripts/dev-status.mjs)                                          | What is served, is it stale, do these URLs resolve                            |
-| [watch-writes.mjs](scripts/watch-writes.mjs)                                      | Stream file events — proves an edit reached disk                              |
+| [watch-writes.mjs](scripts/watch-writes.mjs)                                      | `--until <path>` proves an edit reached disk; bare, streams file events       |
 | [read-file.mjs](scripts/read-file.mjs) / [write-file.mjs](scripts/write-file.mjs) | Read/write source files as the CMS sees them                                  |
 | [browser.mjs](scripts/browser.mjs)                                                | Start/stop the Chrome the other scripts attach to                             |
 | [ve-open.mjs](scripts/ve-open.mjs)                                                | Open a file in the Visual Editor                                              |
@@ -133,7 +135,7 @@ project — adjust the path to wherever this skill's `scripts/` actually sits.
 
 | Excuse                                           | Reality                                                                                                                |
 | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| "The editor shows the new text, so it saved."    | The DOM changed. Only `watch-writes.mjs` or `read-file.mjs` proves the file changed.                                   |
+| "The editor shows the new text, so it saved."    | The DOM changed. Only `watch-writes.mjs --until <path>` or `read-file.mjs` proves the file changed.                    |
 | "I'll write a CSS selector for that component."  | Markup nesting varies per site and per component. Use an address from `ve-components.mjs`; it survives layout changes. |
 | "`/en/` returns 500, the server is broken."      | The dev server has no directory-index resolution. Request `/en/index.html`.                                            |
 | "I rebuilt, so the editor is showing my change." | The editor caches the page it loaded. Re-run `ve-open.mjs` after a rebuild.                                            |

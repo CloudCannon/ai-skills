@@ -42,19 +42,31 @@ node dev-status.mjs --check /en/ --check /_rcc/locales.json
 
 Exits non-zero if unreachable or any check fails.
 
+The staleness comparison resolves the server's source paths under `--root`, so
+it only works when that is the site directory. Pointed anywhere else it prints
+`UNKNOWN` and says so — it never reports a build fresh without having checked.
+Relevant whenever `CC_PLAYWRIGHT_DIR` is being used to run these scripts from
+outside the site.
+
 ### `watch-writes.mjs`
 
-Streams the dev server's file events. Proves an editor action reached disk.
+Proves an editor action reached disk. Start it before making the edit — the
+baseline is taken at startup.
 
 ```sh
 node watch-writes.mjs --timeout 20 --until rosey/locales/fr.json
 ```
 
-| Flag        | Meaning                                                        |
-| ----------- | -------------------------------------------------------------- |
-| `--timeout` | Seconds to watch (default 15)                                  |
-| `--until`   | Exit 0 on the first event matching this fragment, 1 on timeout |
-| `--output`  | Also report `output-change` events                             |
+| Flag         | Meaning                                                    |
+| ------------ | ---------------------------------------------------------- |
+| `--until`    | Poll this path; exit 0 when its bytes change, 1 on timeout |
+| `--timeout`  | Seconds to watch (default 15)                              |
+| `--interval` | Seconds between polls (default 0.25)                       |
+| `--output`   | Stream mode only: also report `output-change` events       |
+
+Without `--until` it streams the SSE event feed instead. That feed omits the
+dev server's own writes, so it never shows a Visual Editor save; only `--until`
+sees those.
 
 ### `read-file.mjs` / `write-file.mjs`
 
@@ -84,6 +96,17 @@ node browser.mjs start [--headless] [--cdp-port 9222]
 node browser.mjs status
 node browser.mjs stop
 ```
+
+| Variable                  | Meaning                                                         |
+| ------------------------- | --------------------------------------------------------------- |
+| `CC_CHROME_BIN`           | Chrome/Chromium binary to use instead of the usual OS locations |
+| `CC_CHROME_FLAGS`         | Extra Chrome flags, space separated, appended last              |
+| `CC_CHROME_NO_AUTO_FLAGS` | Skip the container flags below                                  |
+
+Headless is forced when there is no display to open a window on. Inside a
+container it also adds `--no-sandbox` and `--disable-dev-shm-usage` when it
+detects they are needed, and prints which and why. See
+[setup.md](../setup.md#running-in-a-container-or-sandbox).
 
 ## Tier 2 — the editor
 
@@ -169,6 +192,19 @@ node ve-screenshot.mjs --frame app --out chrome.png
 Bookshop ranges have no host element, so their capture is clipped to the union
 box of the nodes between the markers.
 
+A target taller or wider than the preview pane would otherwise come back part
+blank — Playwright's capture-beyond-viewport only applies to the top-level page,
+and the preview is an iframe, so anything below the frame's own viewport is
+never painted. The script grows the browser viewport to fit, captures, and puts
+it back, saying so when it does:
+
+```
+captured sections.1 (array-item) -> region.png (viewport grown to 1625x1174 to fit)
+```
+
+Past 8000px it stops growing and warns that the image is truncated rather than
+reporting a clean capture.
+
 ### `ve-click.mjs` / `ve-type.mjs`
 
 ```sh
@@ -187,6 +223,16 @@ node ve-type.mjs --path content_blocks.0.heading.heading_text --text "New headin
 typing key-by-key re-renders the component per keystroke and the edit dies after
 one character.
 
+Replacing deletes the selection before inserting, rather than typing over it.
+Typing over a selection makes the browser carry that selection's formatting onto
+the new text: replacing a heading containing
+`<span class="highlight-text">` wrote `<font color="#5429ff">new text</font>` to
+disk, and CloudCannon then marked that `font` tag `contenteditable="false"`, so
+the region stopped being editable too. `execCommand("removeFormat")` does not
+help; deleting first does. The script also compares the resulting markup, not
+just the text, and warns if a region gains formatting the typed string did not
+contain — `textContent` is identical either way, which is why this went unseen.
+
 ### `ve-console.mjs`
 
 Console output, page errors and failed requests across every frame. Reloads by
@@ -203,7 +249,13 @@ node ve-console.mjs --watch 20 --grep RCC
 | `--errors`    | Only errors and failed requests   |
 | `--no-reload` | Do not reload first               |
 
-Calls out named failure modes, including a 404 on `/_rcc/locales.json`.
+Calls out named failure modes, including a 404 on `/_rcc/locales.json`, and
+checks whether RCC actually finished starting up.
+
+That check reads the DOM (`#rcc-locale-switcher`, injected at the end of RCC's
+`init()`) rather than the logs. RCC's `Ready — N locales` line is verbose-gated
+and absent on any page without `data-rcc-verbose`, so its absence means nothing
+on its own.
 
 ### `ve-eval.mjs`
 

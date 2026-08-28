@@ -74,12 +74,20 @@ const target = `${baseUrl(flags)}/#sites/${siteId}/collections/${flags.collectio
 
 await page.goto(target, { waitUntil: "domcontentloaded" });
 
-const frame = await waitForSiteFrame(page, { timeoutMs: Number(flags.timeout ?? 45000) });
-const count = await frame.evaluate(() => document.querySelectorAll("[data-editable]").length);
+// The count comes from the wait itself, taken once the region set stopped
+// changing. Reading it separately afterwards would report whatever hydration
+// happened to be doing at that instant.
+const settle = {};
+await waitForSiteFrame(page, { timeoutMs: Number(flags.timeout ?? 45000), out: settle });
 
 console.log(`opened ${flags.path} (site ${siteId})`);
 console.log(`url: ${target}`);
-console.log(`site frame ready — ${count} editable region(s) present`);
+console.log(`site frame ready — ${settle.count} editable region(s) present`);
+if (!settle.settled) {
+	console.log(
+		"warning: the region set was still changing when the wait gave up — the count above is a snapshot, not a total.",
+	);
+}
 
 // Detaches the CDP connection without closing the browser, which the next
 // script reattaches to. Without this the socket keeps the event loop alive and

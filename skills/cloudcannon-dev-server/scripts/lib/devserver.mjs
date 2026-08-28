@@ -27,7 +27,7 @@ export async function details(flags) {
 	return res.json();
 }
 
-/** { content, size, mtime } for a source-relative path. */
+/** { content, file_size, last_modified } for a source-relative path. */
 export async function fileInfo(path, flags) {
 	const res = await req(`${baseUrl(flags)}/__api/file/${stripLeadingSlash(path)}`);
 	if (res.status === 404) return null;

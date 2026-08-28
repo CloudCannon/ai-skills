@@ -27,6 +27,10 @@ Flags:
   --root    Site root on disk for the staleness check (default: cwd)
   --port    Dev server port (default 10101)
 
+The staleness check needs --root to be the site directory. Pointed anywhere
+else it reports UNKNOWN rather than guessing — it never reports a fresh build
+it did not actually verify.
+
 Exits non-zero if the server is unreachable or any --check fails.
 `;
 
@@ -51,16 +55,18 @@ const root = String(flags.root ?? process.cwd());
 function newestMtime(files) {
 	let newest = 0;
 	let which = null;
+	let found = 0;
 	for (const f of files) {
 		try {
 			const m = statSync(join(root, f)).mtimeMs;
+			found++;
 			if (m > newest) {
 				newest = m;
 				which = f;
 			}
 		} catch {}
 	}
-	return { newest, which };
+	return { newest, which, found };
 }
 
 const ignorable = /^(node_modules|\.git|_untranslated_site)\//;
@@ -74,9 +80,21 @@ try {
 	outMtime = statSync(join(root, info.outputDir)).mtimeMs;
 } catch {}
 
-if (src.newest && outMtime && src.newest > outMtime) {
+// The paths from /__api/details are relative to the site, so a --root pointing
+// anywhere else resolves none of them. That must not read as a clean bill of
+// health: "I checked and it is current" and "I could not check at all" have to
+// look different, or this reports a fresh build for a stale one — the exact
+// mistake the script exists to prevent. Running from outside the site is now
+// routine, since CC_PLAYWRIGHT_DIR removed the reason to cd into it.
+if (!src.found || !outMtime) {
+	const missing = !src.found
+		? `any of its ${sources.length} source files`
+		: `its ${info.outputDir}/ directory`;
+	console.log(`build:     UNKNOWN — could not find ${missing} under ${root}`);
+	console.log("           staleness NOT checked. Pass --root <site directory>.");
+} else if (src.newest > outMtime) {
 	const mins = Math.round((src.newest - outMtime) / 60000);
-    console.log(
+	console.log(
 		`\nSTALE: ${src.which} is ${mins} minute(s) newer than ${info.outputDir}/.` +
 			"\n       Rebuild before trusting anything you see — cloudcannon dev does not build.",
 	);

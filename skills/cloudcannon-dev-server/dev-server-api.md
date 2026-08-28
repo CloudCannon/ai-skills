@@ -40,17 +40,23 @@ trailing-slash path as `index.html`, so `dev-status.mjs --check /en/` works.
 | `file-create` / `file-edit` / `file-delete` | A **source** file changes on disk                                     |
 | `output-change`                             | Files in the output directory change; batched into `{ paths: [...] }` |
 
-**Writes the app makes are not echoed back.** The server marks app-initiated
-uploads and suppresses the corresponding watcher event, so `write-file.mjs` does
-not produce a `file-edit`. Editor UI edits do, because CloudCannon writes them
-through the same upload route the watcher then sees — this is what makes
-`watch-writes.mjs` a real proof of persistence.
+**Writes the dev server makes are not echoed back.** It marks its own writes and
+suppresses the corresponding watcher event, so neither `write-file.mjs` nor a
+Visual Editor save produces a `file-edit`. The stream reports external writes
+only — an edit made in the editor is invisible on it, verified with a control
+(one editor edit and one shell write to the same file in one capture window;
+only the shell write appeared).
+
+`/__api/file` does reflect editor writes immediately, so persistence has to be
+proven by reading the file back:
 
 ```sh
 node scripts/watch-writes.mjs --timeout 20 --until rosey/locales/fr.json
 ```
 
-Exits 0 as soon as a matching write appears, 1 on timeout.
+`--until` polls that path and exits 0 as soon as its bytes change, 1 on timeout.
+Without it the script streams the event feed, which is only useful for watching
+what a build or an external tool touches.
 
 ## Proving an edit persisted
 
