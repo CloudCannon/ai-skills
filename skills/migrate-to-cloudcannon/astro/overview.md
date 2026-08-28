@@ -43,7 +43,7 @@ Add `@cloudcannon/editable-regions` for inline editing in CloudCannon's Visual E
 
 ### Phase 5: Build and test
 
-Validate the migration works end-to-end (local build and SSG-specific checks in [build.md](build.md)), then hand off using [SKILL.md § Handoff and verification](../SKILL.md#handoff-and-verification) so the user can verify in CloudCannon.
+Validate the migration works end-to-end (local build and SSG-specific checks in [build.md](build.md)), then hand off using [SKILL.md § Handoff and verification](../handoff.md) so the user can verify in CloudCannon.
 
 See [build.md](build.md).
 

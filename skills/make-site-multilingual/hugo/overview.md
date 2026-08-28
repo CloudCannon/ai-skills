@@ -1,6 +1,6 @@
 # Hugo-Specific Patterns
 
-Framework-specific implementation details for making a Hugo site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](../SKILL.md) workflow and [`tagging.md`](../tagging.md).
+Framework-specific implementation details for making a Hugo site multilingual with Rosey/RCC/CloudCannon. Read alongside [`setup.md`](../setup.md) and [`tagging.md`](../tagging.md).
 
 ## Coverage note — read this first
 

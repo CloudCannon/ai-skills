@@ -14,6 +14,19 @@ description: >-
 
 # CloudCannon configuration
 
+## When to use
+
+- Creating or customizing `cloudcannon.config.yml` or `.cloudcannon/initial-site-settings.json`
+- Adding or changing Collections, Inputs, Structures, or Select Data
+- A field is missing from the editor, or shows the wrong Input type
+- Configuring Collection URLs so pages open in the Visual Editor
+
+## When not to use
+
+- **Adding editable regions to templates** — that is [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md). This skill configures the data behind them.
+- **MDX components or inline HTML in content** — that is [`cloudcannon-snippets`](../cloudcannon-snippets/SKILL.md)
+- **Running a full migration** — start at [`migrate-to-cloudcannon`](../migrate-to-cloudcannon/SKILL.md), which enters this skill at Phase 2
+
 ## Do this before writing any configuration
 
 ```bash
@@ -26,34 +39,7 @@ curl -sL "https://github.com/cloudcannon/configuration-types/releases/latest/dow
 
 Do not proceed until both files exist. Training data hallucinates keys — the schemas are the only authoritative source.
 
-These are large generated reference files, not project artefacts — add `.cloudcannon/migration/*.schema.json` to `.gitignore` so they aren't committed. (The migration phase docs in the same folder are intentional and should be kept.)
-
-**Before writing any key, query the schema:**
-
-```bash
-# List all valid keys for a section (e.g. collections_config entries)
-jq '.definitions["collections_config.*"].properties | keys' .cloudcannon/migration/cloudcannon-config.latest.schema.json
-
-# Check whether a specific key exists
-jq '.definitions["collections_config.*"].properties.disable_file_actions' .cloudcannon/migration/cloudcannon-config.latest.schema.json
-
-# List all valid input type values
-jq '[.definitions | to_entries[] | select(.key | test("Input$")) | .key]' .cloudcannon/migration/cloudcannon-config.latest.schema.json
-
-# List valid keys for _editables.content (BlockEditable)
-jq '.definitions.BlockEditable.properties | keys' .cloudcannon/migration/cloudcannon-config.latest.schema.json
-
-# List valid keys on a structure value item
-jq '.definitions["type.structure.values.[*]"].properties | keys' .cloudcannon/migration/cloudcannon-config.latest.schema.json
-```
-
-No `jq`? Use Node:
-
-```bash
-node -e "const s=require('./.cloudcannon/migration/cloudcannon-config.latest.schema.json'); console.log(Object.keys(s.definitions['collections_config.*'].properties))"
-```
-
-Do not add a `# yaml-language-server: $schema=...` comment to `cloudcannon.config.yml`.
+Query recipes, the `.gitignore` rule, and the `yaml-language-server` rule are in [json-schemas.md](json-schemas.md).
 
 This skill covers creating and customizing `cloudcannon.config.yml` (tells CloudCannon how to understand and present your site's content), and `.cloudcannon/initial-site-settings.json` (tells CloudCannon how build your site).
 
@@ -95,13 +81,14 @@ Issues you'll hit while configuring or debugging a real site, with their fix.
 | Data file is a top-level object keyed by slug (`{ "office-a": {...}, "office-b": {...} }`)                                                   | Editors can't add a third item — keys are baked into `file_config`. Convert to a top-level array with an explicit `slug` field per item; consumers switch from `data[slug]` to `data.find(d => d.slug === s)`. `values: data.<file>` + `value_key: slug` is unchanged.                                                                                                                                                                                                             |
 | Visual editor errors on one entry but not others — the errored entry has a frontmatter field populated that the template renders as editable | The collection's `_inputs` has no entry for that field. Grep every `data-prop=` in the template, grep `_inputs:` in the collection config, diff the keys. Any editable region without a matching `_inputs` entry is the bug. Add an entry whose `type:` matches the region's `data-type`.                                                                                                                                                                                          |
 
-## Docs
+## Contents
 
-| Doc                                                  | When to read                                                                                                                  |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [cloudcannon-cli-guide.md](cloudcannon-cli-guide.md) | Generating baseline config with the CloudCannon CLI                                                                           |
-| [structures.md](structures.md)                       | Defining structures for arrays and object inputs. **Read this early** — missing structures are the most common config mistake |
-| [collection-urls.md](collection-urls.md)             | URL patterns for collections. Wrong URLs = pages won't load in the Visual Editor                                              |
+| File                                                 | Covers                                                                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [json-schemas.md](json-schemas.md)                   | Querying the authoritative schemas — do this before writing any key                                                                               |
+| [cloudcannon-cli-guide.md](cloudcannon-cli-guide.md) | Generating a baseline, and `validate`. CLI output **always** needs customization — it infers no input types, structures, select data, or toolbars |
+| [structures.md](structures.md)                       | **Read early.** Every array and object Input needs a structure or editors cannot add items. Field completeness rule and definition patterns       |
+| [collection-urls.md](collection-urls.md)             | Collections that produce pages need a `url`. A wrong one is the most common reason a page fails to load in the Visual Editor                      |
 
 **SSG-specific:**
 
@@ -114,33 +101,18 @@ Enter through the SSG's `overview.md`; it gives the reading order for that SSG's
 | Astro | [astro/collection-urls.md](astro/collection-urls.md)             | Glob-loader `slug` override and the `trailingSlash` rule                        |
 | Astro | [astro/configuration-gotchas.md](astro/configuration-gotchas.md) | Icon fields, numeric values, markdown tables, and other Astro-specific pitfalls |
 
+**Rules that live in a deep-dive, flagged here because agents miss them:**
+
+| Rule                                                                                                                  | Owner                                                              |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Explicit `_inputs` beat inference — CloudCannon's type inference is a fallback, not a substitute for configuration    | [astro/configuration.md](astro/configuration.md)                   |
+| One collection, many schemas — do not create a collection just to get a new schema (`schemas:` config, Zod `z.union`) | [astro/configuration.md § Schemas](astro/configuration.md#schemas) |
+
 **Other skills:**
 
 | Skill                                                        | When to read                                                                                                                                                                                        |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [make-site-multilingual](../make-site-multilingual/SKILL.md) | Configuring a multilingual site — `locales_{code}` entries under `data_config`, per-locale collections, locale-prefixed collection URLs, and why a `source:` key breaks `rosey/locales/` resolution |
-
-## Key concepts
-
-### CloudCannon CLI
-
-`npx @cloudcannon/cli configure generate --auto --initial-build-settings` produces a structural baseline. It detects your SSG, collections, and build settings. **CloudCannon CLI output always needs customization** — it does not infer input types, structures, select data, or editor toolbar configuration.
-
-### Structures
-
-Every array and object input needs a structure definition. Without one, editors can't add new items. See [structures.md](structures.md) for the field completeness rule and definition patterns.
-
-### Collection URLs
-
-Collections that produce pages need a `url` pattern so the Visual Editor can open them. A wrong URL is the most common reason pages fail to load in the Visual Editor. See [collection-urls.md](collection-urls.md).
-
-### Inputs
-
-Every user-facing frontmatter field needs an `_inputs` entry with the right type (`textarea`, `datetime`, `image`, `select`, `markdown`, `html`, etc.). CloudCannon's type inference is a fallback — don't rely on it.
-
-### Multi-schema collections
-
-One collection, many schemas. Don't make a new collection just because you need a new schema. Both CloudCannon (`schemas:` config) and Astro (Zod `z.union`) support multiple schemas in one collection. A `pages` collection can hold a default markdown page, a page-builder page, and a landing page side-by-side. See [astro/configuration.md § Schemas](astro/configuration.md#schemas) for the worked pattern.
 
 ## Checklist reinforcement
 

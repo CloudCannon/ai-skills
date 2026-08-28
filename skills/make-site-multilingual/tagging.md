@@ -1,6 +1,6 @@
 # Tagging Templates with `data-rosey`
 
-Phase 3 of [`SKILL.md`](SKILL.md), in full. Add Rosey attributes to the built HTML, working from the outermost layout inward.
+Phase 3 of [`setup.md`](setup.md), in full. Add Rosey attributes to the built HTML, working from the outermost layout inward.
 
 **MUST verify on a translated page.** Almost every mistake in this file renders correctly in the default language — Rosey doesn't inject there. Check `/{locale}/`, not `/`.
 

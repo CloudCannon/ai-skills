@@ -10,7 +10,7 @@ description: >-
 
 `@cloudcannon/editable-regions` makes page elements interactive in CloudCannon's Visual Editor. This skill covers the editable regions API, integration setup, and SSG-specific patterns for wiring up text, image, array, and component editables.
 
-## When to use this skill
+## When to use
 
 - Adding Visual Editor support to a new or existing CloudCannon site
 - Making page sections editable (text, images, arrays, components)
@@ -18,7 +18,13 @@ description: >-
 - Debugging editable regions that aren't appearing or updating
 - Adding editable regions to shared partials backed by data files
 
-## Docs
+## When not to use
+
+- **The field has no `_inputs` entry or the collection is unconfigured** — configure it first with [`cloudcannon-configuration`](../cloudcannon-configuration/SKILL.md). An editable region with no matching Input errors in the editor.
+- **Editors need to insert new markup inside rich text** — that is [`cloudcannon-snippets`](../cloudcannon-snippets/SKILL.md). Editable regions edit what is already rendered.
+- **A page will not open in the Visual Editor at all** — that is usually a wrong collection `url`, not a region problem. See [cloudcannon-configuration/collection-urls.md](../cloudcannon-configuration/collection-urls.md).
+
+## Contents
 
 | Doc                                                            | When to read                                                                        |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------- |

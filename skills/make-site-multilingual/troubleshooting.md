@@ -1,6 +1,6 @@
 # Multilingual Troubleshooting
 
-Symptom-driven diagnosis for a Rosey/RCC site. Preventative one-line rules live in [`SKILL.md` § Gotchas](SKILL.md#gotchas); authoring rules live in [`tagging.md`](tagging.md).
+Symptom-driven diagnosis for a Rosey/RCC site. Preventative one-line rules live in [gotchas.md](gotchas.md); authoring rules live in [`tagging.md`](tagging.md).
 
 **Start here: almost every multilingual bug renders correctly in the default language.** Rosey doesn't inject translations on the default-language pages, so a polluted key, a stale namespace, or a double-prefixed URL is invisible at `/`. Reproduce on `/{locale}/` — and, on an RCC site, in the Visual Editor — before concluding anything works.
 

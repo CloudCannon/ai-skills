@@ -10,14 +10,20 @@ description: >-
 
 Snippets let editors insert and edit complex markup (components, shortcodes, embeds) inside CloudCannon's rich text Content Editor. This skill covers both the SSG layer (how components are imported/built) and the CloudCannon layer (`_snippets` config that teaches the editor the syntax).
 
-## When to use this skill
+## When to use
 
 - Adding snippet support to a new or existing CloudCannon site
 - Configuring MDX components for the Content Editor
 - Adding inline HTML snippets (figure, video, details) to markdown content
 - Debugging snippet parsing, round-trip, or toolbar issues
 
-## Docs
+## When not to use
+
+- **The component should be a page-builder block, not inline content** — editors pick blocks from a structure, not from the rich text toolbar. See [`cloudcannon-configuration`](../cloudcannon-configuration/SKILL.md) and the migration skill's page-building guide.
+- **Making an existing rendered element editable in place** — that is [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md). Snippets insert new markup; editable regions edit markup already on the page.
+- **Plain markdown content with no components or inline HTML** — no snippet configuration is needed
+
+## Contents
 
 | Doc                                            | When to read                                                                                                                                             |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |

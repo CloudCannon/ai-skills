@@ -1,6 +1,6 @@
 # Astro-Specific Patterns
 
-Framework-specific implementation details for making an Astro site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](../SKILL.md) workflow and [`tagging.md`](../tagging.md). The last section covers **migrating an Astro site off its existing i18n system** (Appendix A of the main skill).
+Framework-specific implementation details for making an Astro site multilingual with Rosey/RCC/CloudCannon. Read alongside [`setup.md`](../setup.md) and [`tagging.md`](../tagging.md). The last section covers **migrating an Astro site off its existing i18n system** — the Astro supplement to [`migrating-from-i18n.md`](../migrating-from-i18n.md).
 
 ## Root Derivation
 
@@ -320,9 +320,9 @@ function buildPath(base, locale) {
 
 ---
 
-## Migrating an Astro Site Off Its Existing i18n (Appendix A supplement)
+## Migrating an Astro Site Off Its Existing i18n
 
-Concrete patterns for replacing Astro's built-in i18n (and/or the official docs recipe) with the Rosey stack. Read alongside Appendix A of the main `SKILL.md`.
+Concrete patterns for replacing Astro's built-in i18n (and/or the official docs recipe) with the Rosey stack. Read alongside [`migrating-from-i18n.md`](../migrating-from-i18n.md).
 
 > **Third-party packages** (`astro-i18next`, `paraglide`) have their own config, runtime APIs, and removal steps beyond this. This focuses on Astro's built-in `i18n` config and the dictionary/`t()` recipe.
 
