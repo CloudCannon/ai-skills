@@ -100,7 +100,7 @@ skills/
 
 - **Living documents** -- Skills are actively maintained. When an agent uncovers a new pattern or edge case during a migration, update the relevant skill as part of the same task rather than leaving it as a follow-up.
 - **Just-in-time reading** -- Agents read docs as needed during each phase rather than loading everything upfront. The skills are structured to support this.
-- **Writing style** -- Skills are read by AI agents with limited context. Front-load rules, prefer tables and checklists over prose, and keep one canonical source per rule. See [STYLE.md](STYLE.md).
+- **Architecture and writing style** -- [STYLE.md](STYLE.md) governs both: where a file goes (skills are concerns, SSGs are subdirectories, every skill has a tier) and what goes in it (front-load rules, prefer tables and checklists over prose, one canonical source per rule).
 
 For a detailed walkthrough of how agents traverse the skill files, see [GUIDE.md](skills/migrating-to-cloudcannon/GUIDE.md).
 
