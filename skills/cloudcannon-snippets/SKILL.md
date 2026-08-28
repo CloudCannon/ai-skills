@@ -29,9 +29,9 @@ Snippets let editors insert and edit complex markup (components, shortcodes, emb
 
 **SSG-specific:**
 
-| SSG   | Doc                                                                           |
-| ----- | ----------------------------------------------------------------------------- |
-| Astro | [astro.md](astro.md) — MDX stack, `astro-auto-import`, when to use MDX vs raw |
+| SSG   | Doc                                                                                             |
+| ----- | ----------------------------------------------------------------------------------------------- |
+| Astro | [astro/overview.md](astro/overview.md) — MDX stack, `astro-auto-import`, when to use MDX vs raw |
 
 ## Quick decision
 
@@ -63,5 +63,5 @@ Read this before starting and verify every item when done.
 | "This component is too niche for a snippet"    | If editors encounter it in content, they need to be able to edit it. Configure it.                                                                                                                                                                                                                                                                                                                                                          |
 | "Import statements in content are fine"        | Use auto-import (Astro: `astro-auto-import`) to keep imports out of content files.                                                                                                                                                                                                                                                                                                                                                          |
 | "I can use `_snippets_imports` for this"       | Don't. It loads catchall matchers that can match incorrectly. Write explicit `_snippets` entries.                                                                                                                                                                                                                                                                                                                                           |
-| "I configured `_snippets`, snippets are done"  | Without `astro-auto-import` wired in `astro.config.mjs` AND the `import` lines removed from MDX files, editors still see raw `import` statements at the top of MDX content. All four pipeline steps are required — see [astro.md § MDX setup pipeline](astro.md#mdx-setup-pipeline-must-complete-all-four).                                                                                                                                 |
+| "I configured `_snippets`, snippets are done"  | Without `astro-auto-import` wired in `astro.config.mjs` AND the `import` lines removed from MDX files, editors still see raw `import` statements at the top of MDX content. All four pipeline steps are required — see [astro/overview.md § MDX setup pipeline](astro/overview.md#mdx-setup-pipeline-must-complete-all-four).                                                                                                               |
 | "Inline image grid in MDX is fine as raw HTML" | Editors can't safely edit raw `<div class="grid">` + `<Image>` blocks. Extract to a self-closing `<Gallery images={[{src, alt}, ...]} />` component (auto-imported) with a matching `_snippets` entry — `images` as `type: array` with nested `images[*].src: type: image`. See [cc-friendly-conventions.md § Image galleries in MDX content](../migrating-to-cloudcannon/astro/cc-friendly-conventions.md#image-galleries-in-mdx-content). |

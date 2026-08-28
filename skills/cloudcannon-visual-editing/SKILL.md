@@ -27,8 +27,11 @@ description: >-
 
 **SSG-specific:**
 
+Enter through the SSG's `overview.md`; it gives the reading order for that SSG's files.
+
 | SSG   | Doc                                                                    | Purpose                                                                    |
 | ----- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Astro | [astro/overview.md](astro/overview.md)                                 | **Start here for Astro** — reading order and what each file covers         |
 | Astro | [astro/visual-editing.md](astro/visual-editing.md)                     | Setup workflow, section census, infrastructure + completeness checklists   |
 | Astro | [astro/visual-editing-reference.md](astro/visual-editing-reference.md) | Pattern reference (read sections on demand as the checklist links to them) |
 

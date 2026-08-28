@@ -46,13 +46,14 @@ SKILL.md                                Entry point — CloudCannon CLI, collect
 cloudcannon-cli-guide.md                CloudCannon CLI commands and options
 structures.md                           Structures — inline vs split, previews, field completeness
 collection-urls.md                      URL patterns — placeholders, trailing slash, troubleshooting
+astro/overview.md                       ENTRY POINT for Astro — reading order
 astro/configuration.md                  Phase 2: CC config, schemas, inputs, add options
 astro/configuration-gotchas.md          Phase 2 gotchas: icon fields, numeric values, etc.
 
 ── cloudcannon-snippets ───────────────────────────────────────
 SKILL.md                                Entry point — when/why/which approach
 snippets.md                             Snippet concepts — config patterns, raw HTML snippets
-astro.md                                Astro-specific: MDX stack, auto-import
+astro/overview.md                       ENTRY POINT for Astro — MDX stack, auto-import
 template-based.md                       Template-based snippet workflow
 raw.md                                  Raw snippet syntax, all parser types
 built-in-templates.md                   MDX templates vs import bundle, parser internals
@@ -62,6 +63,7 @@ gotchas.md                              Snippet pitfalls and debugging
 SKILL.md                                Entry point — region types, workflow, checklist
 editable-regions.md                     Region types, attribute reference, decision tree
 editable-regions-internals.md           ON DEMAND — lifecycle trace, JS API, quirks
+astro/overview.md                       ENTRY POINT for Astro — reading order
 astro/visual-editing.md                 Phase 4: workflow, census, checklists
 astro/visual-editing-reference.md       Phase 4: pattern reference (read on demand)
 scripts/setup-editable-regions.sh       Installs package, wires Astro integration
@@ -70,9 +72,9 @@ scripts/setup-editable-regions.sh       Installs package, wires Astro integratio
 SKILL.md                                Entry point — the 9 phases, RCC layer, gotchas, v1→v2 upgrade
 tagging.md                              Phase 3 in full — every data-rosey/-ns/-root authoring rule
 troubleshooting.md                      Symptom → cause → fix for builds that translate wrongly
-astro.md                                Astro-specific: root derivation, head/SEO, taxonomy routes
-eleventy.md                             Eleventy-specific tagging, taxonomy scoping, link localization
-hugo.md                                 Hugo-specific tagging and pipeline (partial — see its coverage note)
+astro/overview.md                       Astro-specific: root derivation, head/SEO, taxonomy routes
+eleventy/overview.md                    Eleventy-specific tagging, taxonomy scoping, link localization
+hugo/overview.md                        Hugo-specific tagging and pipeline (partial — see its coverage note)
 
 ── translate-multilingual (outside the migration phases) ──────
 SKILL.md                                Entry point — locale JSON (Part 1), content dirs (Part 2)

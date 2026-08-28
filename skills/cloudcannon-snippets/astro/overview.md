@@ -1,6 +1,6 @@
 # Snippets (Astro)
 
-Guidance for configuring CloudCannon snippets for MDX components in an Astro site. Read the cross-SSG [snippets overview](snippets.md) first for CC snippet concepts and reference. This page complements that overview’s template-based vs raw discussion by focusing on the **Astro + MDX** stack (content shape, auto-import, and Astro-specific raw patterns such as `client:load`).
+Guidance for configuring CloudCannon snippets for MDX components in an Astro site. Read the cross-SSG [snippets overview](../snippets.md) first for CC snippet concepts and reference. This page complements that overview’s template-based vs raw discussion by focusing on the **Astro + MDX** stack (content shape, auto-import, and Astro-specific raw patterns such as `client:load`).
 
 ## When this doc applies (MDX path)
 
@@ -9,7 +9,7 @@ This workflow assumes editors use **MDX component tags** in content. Concretely:
 - MDX integration (`@astrojs/mdx`) installed and registered in `astro.config.mjs`
 - Content files that use those components are `.mdx` (not `.md`)
 
-**Agent discretion:** A site may start as Markdown-only. Either refactor toward the bullets above—install MDX, register it, convert or rename affected entries to `.mdx`—when built-in `mdx_*` templates and auto-import are simpler than a large raw-snippet surface, or keep `.md` and rely on **raw** snippets per [raw.md](raw.md) and [Which approach?](snippets.md#which-approach) in the overview. Raw snippets offer maximum flexibility and literal syntax control; the MDX + template path is often less complicated for standard props and paired content, at the cost of format and build setup.
+**Agent discretion:** A site may start as Markdown-only. Either refactor toward the bullets above—install MDX, register it, convert or rename affected entries to `.mdx`—when built-in `mdx_*` templates and auto-import are simpler than a large raw-snippet surface, or keep `.md` and rely on **raw** snippets per [raw.md](../raw.md) and [Which approach?](../snippets.md#which-approach) in the overview. Raw snippets offer maximum flexibility and literal syntax control; the MDX + template path is often less complicated for standard props and paired content, at the cost of format and build setup.
 
 ## MDX setup pipeline (must complete all four)
 
@@ -98,7 +98,7 @@ Astro's `client:load`, `client:idle`, `client:visible` directives trigger client
 
 Use raw snippet syntax to include the directive as literal text.
 
-For raw `key_values` on MDX attributes, include `format` with `root_value_delimiter` and `string_boundary` whenever you use normal `prop="value"` (or similar) syntax — optional in schema, required in practice. See [raw.md — `key_values`](raw.md#key_values--keyvalue-pairs).
+For raw `key_values` on MDX attributes, include `format` with `root_value_delimiter` and `string_boundary` whenever you use normal `prop="value"` (or similar) syntax — optional in schema, required in practice. See [raw.md — `key_values`](../raw.md#key_values--keyvalue-pairs).
 
 ### Self-closing with `client:load`
 
@@ -198,7 +198,7 @@ _snippets:
 
 ## Nested components (repeating parser)
 
-For nested patterns like `<Tabs><Tab>...</Tab></Tabs>`, use a single snippet with the `repeating` parser. See [raw.md § repeating](raw.md#repeating--repeat-a-child-pattern-as-array-items) for the full parser reference. Do NOT define the child as a separate `_snippets` entry — it would match standalone and steal content from the parent.
+For nested patterns like `<Tabs><Tab>...</Tab></Tabs>`, use a single snippet with the `repeating` parser. See [raw.md § repeating](../raw.md#repeating--repeat-a-child-pattern-as-array-items) for the full parser reference. Do NOT define the child as a separate `_snippets` entry — it would match standalone and steal content from the parent.
 
 **Astro-specific note:** Tabs components typically need `client:load` on the parent element. Include this in the snippet template string:
 

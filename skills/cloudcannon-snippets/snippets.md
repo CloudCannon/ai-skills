@@ -34,7 +34,7 @@ Root-level config keys that relate to snippets:
 
 Most migrations only need `_snippets`.
 
-`_snippets_imports` exists but should not be used during migrations — see [gotchas.md § Do not use `_snippets_imports` during migrations](gotchas.md#_snippets_imports-can-match-unintended-content). Import handling in MDX content is an SSG concern: use `astro-auto-import` (or equivalent) — see [astro.md § Auto-import](astro.md#auto-import-keeping-import-statements-out-of-content). For built-in **templates** vs the **import bundle**, see [built-in-templates.md](built-in-templates.md).
+`_snippets_imports` exists but should not be used during migrations — see [gotchas.md § Do not use `_snippets_imports` during migrations](gotchas.md#_snippets_imports-can-match-unintended-content). Import handling in MDX content is an SSG concern: use `astro-auto-import` (or equivalent) — see [astro/overview.md § Auto-import](astro/overview.md#auto-import-keeping-import-statements-out-of-content). For built-in **templates** vs the **import bundle**, see [built-in-templates.md](built-in-templates.md).
 
 ---
 
@@ -45,7 +45,7 @@ Most migrations only need `_snippets`.
 
 Most migrations use template-based for simple components and raw for anything with SSG-specific directives.
 
-For **Astro**, [astro.md](astro.md) connects this choice to the SSG layer: when to adopt the MDX stack (including refactoring from Markdown-only) versus staying on `.md` with more raw parsing work.
+For **Astro**, [astro/overview.md](astro/overview.md) connects this choice to the SSG layer: when to adopt the MDX stack (including refactoring from Markdown-only) versus staying on `.md` with more raw parsing work.
 
 ---
 
@@ -252,4 +252,4 @@ Apply this pattern to every snippet that has an image `editor_key` — not just 
 
 **SSG-specific guidance:**
 
-- Astro: [astro.md](astro.md)
+- Astro: [astro/overview.md](astro/overview.md)

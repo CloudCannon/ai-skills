@@ -1,6 +1,6 @@
 # Astro-Specific Patterns
 
-Framework-specific implementation details for making an Astro site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](SKILL.md) workflow and [`tagging.md`](tagging.md). The last section covers **migrating an Astro site off its existing i18n system** (Appendix A of the main skill).
+Framework-specific implementation details for making an Astro site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](../SKILL.md) workflow and [`tagging.md`](../tagging.md). The last section covers **migrating an Astro site off its existing i18n system** (Appendix A of the main skill).
 
 ## Root Derivation
 
@@ -10,7 +10,7 @@ For a route that maps one-to-one to a URL, `Astro.url.pathname` in the component
 <main data-rosey-root={Astro.url.pathname.replace(/^\/|\/$/g, '') || 'index'}>
 ```
 
-**MUST NOT use it on a route where one template serves many URLs.** Paginated routes (`[...page].astro`) and taxonomy routes are the common cases: `/blog/` derives `blog` while `/blog/2/` derives `blog/2`, so page 2 mints a duplicate, untranslated copy of every key on it — and the default-language site renders perfectly. See [tagging.md § 3e](tagging.md#3e-derive-the-root-from-the-templates-source-identity).
+**MUST NOT use it on a route where one template serves many URLs.** Paginated routes (`[...page].astro`) and taxonomy routes are the common cases: `/blog/` derives `blog` while `/blog/2/` derives `blog/2`, so page 2 mints a duplicate, untranslated copy of every key on it — and the default-language site renders perfectly. See [tagging.md § 3e](../tagging.md#3e-derive-the-root-from-the-templates-source-identity).
 
 Take an explicit `roseyRoot` prop on the layout and pass it from those routes:
 
@@ -27,7 +27,7 @@ Take an explicit `roseyRoot` prop on the layout and pass it from those routes:
 
 ## Content-Block Namespacing — put rosey attributes _inside_ the item component
 
-> This implements the core rule from [§3g](tagging.md#3g-namespacing-arrays-and-page-builder-blocks). On Astro sites it is the **default** pattern for any array/repeater rendered in a loop — not an edge-case fix.
+> This implements the core rule from [§3g](../tagging.md#3g-namespacing-arrays-and-page-builder-blocks). On Astro sites it is the **default** pattern for any array/repeater rendered in a loop — not an edge-case fix.
 
 For CMS page-builder pages using `content_blocks` (or any looped array — testimonials, team members, FAQ entries), use the item's `_uuid` field (populated by CloudCannon's `instance_value: UUID`) as the namespace segment, and place that namespace on **the item component's own root**, not on the `.map()` wrapper in the parent.
 
@@ -69,9 +69,9 @@ The same principle applies to a top-level `content_blocks` loop, where each bloc
 <!-- key: index:3f43d721-...:heading -->
 ```
 
-This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every structure value — see [§3g](tagging.md#stable-namespace-values-uuids-cloudcannon-sites-rcc-layer). Existing content files need a **seeding pass**, including structure defaults and `src/data/*.json` — follow the procedure in [§3g](tagging.md#seeding-_uuid-into-existing-content-rcc-layer) rather than hand-editing, and grep the built output for `data-rosey-ns="undefined"` afterwards. For a working example, see the [Rosey Astro Starter](https://github.com/CloudCannon/rosey-astro-starter) (`Page.astro` and `cloudcannon.config.yml`).
+This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every structure value — see [§3g](../tagging.md#stable-namespace-values-uuids-cloudcannon-sites-rcc-layer). Existing content files need a **seeding pass**, including structure defaults and `src/data/*.json` — follow the procedure in [§3g](../tagging.md#seeding-_uuid-into-existing-content-rcc-layer) rather than hand-editing, and grep the built output for `data-rosey-ns="undefined"` afterwards. For a working example, see the [Rosey Astro Starter](https://github.com/CloudCannon/rosey-astro-starter) (`Page.astro` and `cloudcannon.config.yml`).
 
-**Structural wrappers get no namespace.** A grid cell, column, slide, or tab panel that only positions its children MUST NOT carry `data-rosey-ns` — destructure `_uuid` so it doesn't reach the DOM, but don't use it. Otherwise dragging a block between columns re-keys every string inside it ([§3g](tagging.md#rule-the-namespace-goes-on-the-component-that-renders-its-own-text)).
+**Structural wrappers get no namespace.** A grid cell, column, slide, or tab panel that only positions its children MUST NOT carry `data-rosey-ns` — destructure `_uuid` so it doesn't reach the DOM, but don't use it. Otherwise dragging a block between columns re-keys every string inside it ([§3g](../tagging.md#rule-the-namespace-goes-on-the-component-that-renders-its-own-text)).
 
 **Fallback (non-CloudCannon):** if `instance_value` isn't available, use `data-rosey-ns={`${block._name}-${i}`}` — but this is fragile, reordering shifts keys, and you lose the clone-safety above.
 
@@ -79,7 +79,7 @@ This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every 
 
 For component-heavy Astro sites where building blocks already use `data-prop` for CloudCannon inline editing, auto-derive `data-rosey` from that attribute:
 
-**MUST sanitise `.` to `_` in the derived key.** Nested props (`price.prefix`, `table.sections.0.rows.1.cells.2`) otherwise produce dotted keys, and **a dotted key renders correctly on the translated site while silently dropping every Visual Editor save** — the connector writes with `slug: "<key>.value"`, so the dot resolves to a nested path that doesn't exist. There is no error. See [§3f](tagging.md#sanitise-dots-out-of-derived-keys-rcc-layer).
+**MUST sanitise `.` to `_` in the derived key.** Nested props (`price.prefix`, `table.sections.0.rows.1.cells.2`) otherwise produce dotted keys, and **a dotted key renders correctly on the translated site while silently dropping every Visual Editor save** — the connector writes with `slug: "<key>.value"`, so the dot resolves to a nested path that doesn't exist. There is no error. See [§3f](../tagging.md#sanitise-dots-out-of-derived-keys-rcc-layer).
 
 Put the derivation in one helper so no call site can skip it:
 
@@ -116,7 +116,7 @@ Key points:
 
 ## Markdown Regions: `data-type` and the Bound Input
 
-A `data-rosey` region rendering markdown needs **both** halves, or it is permanently stale and its formatting is uneditable ([§3c](tagging.md#markdown-regions-need-a-matching-data-type-and-a-rich-bound-input-rcc-layer)):
+A `data-rosey` region rendering markdown needs **both** halves, or it is permanently stale and its formatting is uneditable ([§3c](../tagging.md#markdown-regions-need-a-matching-data-type-and-a-rich-bound-input-rcc-layer)):
 
 | Astro render call        | `data-type`         |
 | ------------------------ | ------------------- |
@@ -197,7 +197,7 @@ const rccExclude = hideLocaleSwitcher ? localeCodes.join(",") : undefined;
 
 Astro omits the attribute entirely when the value is `undefined`, so pages that don't opt in are untouched. Set the prop in the **post layout** (`Post.astro`), which both `blog/[slug].astro` and `[locale]/blog/[slug].astro` render through — one place covers every post page.
 
-### Taxonomy routes ([§3i](tagging.md#3i-taxonomy-labels-tags-categories) in Astro)
+### Taxonomy routes ([§3i](../tagging.md#3i-taxonomy-labels-tags-categories) in Astro)
 
 Taxonomy pages need a per-locale route too — `src/pages/[locale]/tags/[tag]/[...page].astro` — or Rosey generates `/{locale}/tags/*` from the default-language page and lists the wrong posts. Mirror the locale blog listing: loop `localeCodes`, build the term set from `getCollection(blogCollectionFor(locale))`, and paginate per term.
 
@@ -215,7 +215,7 @@ This applies to every paginated `[locale]` route, not just taxonomy ones — wor
 
 Pass `roseyRoot="tags"` (not the derived `{locale}/tags/{tag}`) so the page heading shares the chip label key from 3i, and give the pagination component a `basePath` that includes both the locale and the term.
 
-## Head/SEO Text ([§3h](tagging.md#3h-head-text-and-attribute-only-text) in Astro)
+## Head/SEO Text ([§3h](../tagging.md#3h-head-text-and-attribute-only-text) in Astro)
 
 **`astro-seo` cannot carry `data-*` attributes.** `<SEO>` renders `<title>` via `set:html` with no attribute pass-through, and its `extend.meta` escape hatch whitelists only `name`/`property`/`content`/`httpEquiv`/`media`, silently dropping anything else. So you can't tag its output.
 

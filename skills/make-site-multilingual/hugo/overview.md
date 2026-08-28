@@ -1,19 +1,19 @@
 # Hugo-Specific Patterns
 
-Framework-specific implementation details for making a Hugo site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](SKILL.md) workflow and [`tagging.md`](tagging.md).
+Framework-specific implementation details for making a Hugo site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](../SKILL.md) workflow and [`tagging.md`](../tagging.md).
 
 ## Coverage note — read this first
 
 **This file is partial, and the main skill's rules have not been verified on Hugo.** The workflow was developed and tested on Astro and Eleventy sites. Two consequences:
 
 - **Hugo has native multilingual routing** (`defaultContentLanguage`, `languages`, `.Site.Home.AllTranslations`). Phase 8 (split-by-directory), Phase 8 step 6 (locale-scoped queries) and step 7 (prefixing internal links) may be partly or wholly handled by Hugo already — check before hand-rolling any of them, and prefer Hugo's own mechanism where it exists.
-- **Everything in [`tagging.md`](tagging.md) does apply**, because Rosey operates on built HTML regardless of SSG. The rules that need a Hugo-specific expression are flagged below; the rest transfer directly.
+- **Everything in [`tagging.md`](../tagging.md) does apply**, because Rosey operates on built HTML regardless of SSG. The rules that need a Hugo-specific expression are flagged below; the rest transfer directly.
 
 Treat gaps here as unverified rather than not-applicable, and feed anything you learn back into this file.
 
 ## Root Derivation
 
-**MUST derive the root from the page's source identity, not `.RelPermalink`** ([§3e](tagging.md#3e-derive-the-root-from-the-templates-source-identity)). `.RelPermalink` is the computed URL, so paginated list pages (`/blog/page/2/`) and one template serving many taxonomy terms each derive a **different** root — minting a duplicate, untranslated copy of every key on those pages while the default-language site renders perfectly.
+**MUST derive the root from the page's source identity, not `.RelPermalink`** ([§3e](../tagging.md#3e-derive-the-root-from-the-templates-source-identity)). `.RelPermalink` is the computed URL, so paginated list pages (`/blog/page/2/`) and one template serving many taxonomy terms each derive a **different** root — minting a duplicate, untranslated copy of every key on those pages while the default-language site renders perfectly.
 
 Use `.File.ContentBaseName` / `.File.Path` for single pages, and set an explicit root on list and taxonomy templates:
 

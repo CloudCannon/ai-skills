@@ -27,14 +27,14 @@ Step-by-step workflow for making a single-language site translatable with **Rose
 
 ## Contents
 
-| File                                     | Covers                                                                                    |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **SKILL.md** (this file)                 | The phase-by-phase workflow, the two migration appendices, and framework-agnostic gotchas |
-| [tagging.md](tagging.md)                 | **Phase 3 in full** — every `data-rosey` / `-ns` / `-root` authoring rule                 |
-| [troubleshooting.md](troubleshooting.md) | Symptom → cause → fix for things that build cleanly and translate wrongly                 |
-| [astro.md](astro.md)                     | Astro implementations, plus the Astro i18n migration supplement                           |
-| [eleventy.md](eleventy.md)               | Eleventy implementations, incl. taxonomy scoping and link localization                    |
-| [hugo.md](hugo.md)                       | Hugo implementations (partial — see the coverage note in that file)                       |
+| File                                         | Covers                                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **SKILL.md** (this file)                     | The phase-by-phase workflow, the two migration appendices, and framework-agnostic gotchas |
+| [tagging.md](tagging.md)                     | **Phase 3 in full** — every `data-rosey` / `-ns` / `-root` authoring rule                 |
+| [troubleshooting.md](troubleshooting.md)     | Symptom → cause → fix for things that build cleanly and translate wrongly                 |
+| [astro/overview.md](astro/overview.md)       | Astro implementations, plus the Astro i18n migration supplement                           |
+| [eleventy/overview.md](eleventy/overview.md) | Eleventy implementations, incl. taxonomy scoping and link localization                    |
+| [hugo/overview.md](hugo/overview.md)         | Hugo implementations (partial — see the coverage note in that file)                       |
 
 ## The two layers
 
@@ -56,13 +56,13 @@ The bulk of this skill (tagging, the pipeline, locale files) is the required Ros
 
 ## SSG detection and framework-specific guidance
 
-After auditing the site (Phase 1), identify the SSG and read the matching file in this directory for framework-specific implementation details:
+After auditing the site (Phase 1), identify the SSG and read the matching `<ssg>/overview.md` for framework-specific implementation details:
 
-| SSG             | File to read                          |
-| --------------- | ------------------------------------- |
-| Astro           | `astro.md` in this skill directory    |
-| Eleventy (11ty) | `eleventy.md` in this skill directory |
-| Hugo            | `hugo.md` in this skill directory     |
+| SSG             | File to read           |
+| --------------- | ---------------------- |
+| Astro           | `astro/overview.md`    |
+| Eleventy (11ty) | `eleventy/overview.md` |
+| Hugo            | `hugo/overview.md`     |
 
 These files contain root derivation patterns, content-block namespacing examples, the array-item component rule, split-by-directory details, locale picker examples, and framework-specific gotchas. The phases below reference them where needed.
 
@@ -366,7 +366,7 @@ Add an inline `<script>` at the top of `<head>` in the root layout — it must r
 </script>
 ```
 
-This uses the same pattern as dark-mode detection scripts — negligible performance impact. In Astro, it needs `is:inline` (see `astro.md`).
+This uses the same pattern as dark-mode detection scripts — negligible performance impact. In Astro, it needs `is:inline` (see `astro/overview.md`).
 
 ### 7b. Audit CSS for physical properties
 
@@ -490,7 +490,7 @@ Add this to the picker's client-side script: the editor branch hides every `nav[
 
 ## Appendix A: Migrating from an existing i18n system
 
-Use this when the site already has an i18n system (astro-i18n, astro-i18next, next-intl, i18next, vue-i18n, path-based routing, dictionaries + `t()`, etc.). The goal is to get to a **clean single-language site**, then apply the main workflow. Astro has a companion supplement (`astro.md` in this directory) with concrete before/after code.
+Use this when the site already has an i18n system (astro-i18n, astro-i18next, next-intl, i18next, vue-i18n, path-based routing, dictionaries + `t()`, etc.). The goal is to get to a **clean single-language site**, then apply the main workflow. Astro has a companion supplement (`astro/overview.md`) with concrete before/after code.
 
 ### A1. Identify the current method
 
@@ -746,4 +746,4 @@ Then push to CloudCannon, confirm the locale-switcher FAB appears, switch locale
 
 ### SSG-specific gotchas
 
-Framework-specific gotchas live in `astro.md`, `eleventy.md`, `hugo.md`. Read the one matching your project.
+Framework-specific gotchas live in `astro/overview.md`, `eleventy/overview.md`, `hugo/overview.md`. Read the one matching your project.

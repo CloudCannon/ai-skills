@@ -105,9 +105,13 @@ Issues you'll hit while configuring or debugging a real site, with their fix.
 
 **SSG-specific:**
 
+Enter through the SSG's `overview.md`; it gives the reading order for that SSG's files.
+
 | SSG   | Doc                                                              | Purpose                                                                         |
 | ----- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Astro | [astro/overview.md](astro/overview.md)                           | **Start here for Astro** — reading order and what each file covers              |
 | Astro | [astro/configuration.md](astro/configuration.md)                 | Full configuration workflow, customization checklist, verification checklist    |
+| Astro | [astro/collection-urls.md](astro/collection-urls.md)             | Glob-loader `slug` override and the `trailingSlash` rule                        |
 | Astro | [astro/configuration-gotchas.md](astro/configuration-gotchas.md) | Icon fields, numeric values, markdown tables, and other Astro-specific pitfalls |
 
 **Other skills:**

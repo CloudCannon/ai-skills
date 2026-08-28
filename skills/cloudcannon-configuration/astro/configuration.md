@@ -522,7 +522,7 @@ Work through these before moving to the next phase. One check per line.
 
 ### Blocking gates
 
-- [ ] **MDX gate:** if any `.mdx` file uses JSX components (`rg '<[A-Z]' -g '*.mdx' src/content`), the [MDX setup pipeline](../../cloudcannon-snippets/astro.md#mdx-setup-pipeline-must-complete-all-four) is fully complete. `_snippets` alone is not enough — auto-import and `import` removal are both required. #1 source of migration regressions.
+- [ ] **MDX gate:** if any `.mdx` file uses JSX components (`rg '<[A-Z]' -g '*.mdx' src/content`), the [MDX setup pipeline](../../cloudcannon-snippets/astro/overview.md#mdx-setup-pipeline-must-complete-all-four) is fully complete. `_snippets` alone is not enough — auto-import and `import` removal are both required. #1 source of migration regressions.
 - [ ] [Structures — mandatory rules](../structures.md#the-four-rules-read-first) all pass (field completeness + array/object structure linkage + preview blocks + nested object preview icons).
 
 ### Files
@@ -561,8 +561,8 @@ Work through these before moving to the next phase. One check per line.
 
 ### Snippets & editors
 
-- [ ] Every MDX component has a `_snippets` entry OR the file uses `_enabled_editors: [source, data]` with rationale in migration notes — see [cloudcannon-snippets/astro.md § Every MDX component must be accounted for](../../cloudcannon-snippets/astro.md#every-mdx-component-must-be-accounted-for)
-- [ ] MDX files with `import` statements set up `astro-auto-import` (or equivalent) so imports are injected at build time and removed from source files — see [astro.md § Auto-import](../../cloudcannon-snippets/astro.md#auto-import-keeping-import-statements-out-of-content)
+- [ ] Every MDX component has a `_snippets` entry OR the file uses `_enabled_editors: [source, data]` with rationale in migration notes — see [cloudcannon-snippets/astro/overview.md § Every MDX component must be accounted for](../../cloudcannon-snippets/astro/overview.md#every-mdx-component-must-be-accounted-for)
+- [ ] MDX files with `import` statements set up `astro-auto-import` (or equivalent) so imports are injected at build time and removed from source files — see [astro/overview.md § Auto-import](../../cloudcannon-snippets/astro/overview.md#auto-import-keeping-import-statements-out-of-content)
 - [ ] `_enabled_editors` order has the preferred default editor first (`visual` for page collections; `visual` → `content` for blog posts)
 - [ ] Collections of `.md` files that don't build to a page have `_enabled_editors: [data]`
 
