@@ -1,5 +1,5 @@
 ---
-name: migrating-to-cloudcannon
+name: migrate-to-cloudcannon
 description: >-
   Migrate an existing SSG site to work with CloudCannon. Use when the user wants
   to onboard a site to CloudCannon, add CMS support, or make a template

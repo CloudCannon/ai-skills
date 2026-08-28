@@ -165,7 +165,7 @@ When implementing split-by-directory (Phase 8) in Eleventy:
   permalink: (data) => `${localePrefix(code)}/blog/${data.page.fileSlug}/`;
   ```
 
-  **Why:** a translated title gives `/fr/blog/edition-en-markdown/` while the picker, `hreflang`, and tag links all point at `/fr/blog/markdown-editing/`. It also breaks `translate-multilingual`'s pairing of source to locale copy, which matches on filename. The stock CloudCannon Eleventy starter uses `title | slugify` — change it.
+  **Why:** a translated title gives `/fr/blog/edition-en-markdown/` while the picker, `hreflang`, and tag links all point at `/fr/blog/markdown-editing/`. It also breaks `translate-site`'s pairing of source to locale copy, which matches on filename. The stock CloudCannon Eleventy starter uses `title | slugify` — change it.
 
 - `localePrefix` MUST return `""` for the default locale. Eleventy builds the default language at the root and `rosey build` relocates it; emitting `/en` here gives `/en/en/` (Phase 1 step 5).
 - Suppress `data-rosey` on frontmatter-driven fields by conditionally omitting the attribute when `locale` is set — including in the `<head>` partial, via a `rosey_seo: false` in the directory data.

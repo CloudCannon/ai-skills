@@ -16,7 +16,7 @@ Agent skills that help AI coding agents migrate existing SSG sites to [CloudCann
 
    For a full migration:
 
-   > Migrate this site to CloudCannon using the migrating-to-cloudcannon skill. If the skill is not found, look in .agents/, otherwise do not continue.
+   > Migrate this site to CloudCannon using the migrate-to-cloudcannon skill. If the skill is not found, look in .agents/, otherwise do not continue.
 
    Or, for creating configuration:
 
@@ -37,7 +37,7 @@ If you use [Claude Code](https://claude.com/claude-code), you can install all se
 /plugin install agent-skills@cloudcannon
 ```
 
-The skills are then available namespaced as `agent-skills:<skill-name>` (e.g. `agent-skills:migrating-to-cloudcannon`), and Claude picks them up automatically based on their trigger descriptions — same as the copy-in route above.
+The skills are then available namespaced as `agent-skills:<skill-name>` (e.g. `agent-skills:migrate-to-cloudcannon`), and Claude picks them up automatically based on their trigger descriptions — same as the copy-in route above.
 
 ## Supported SSGs
 
@@ -53,17 +53,17 @@ The tooling is split across composable skills that can be used together or indep
 
 | Skill                        | Purpose                       | When to use                                                                                   |
 | ---------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------- |
-| `migrating-to-cloudcannon`   | Full migration orchestrator   | Migrating a site to CloudCannon end-to-end (audit, configure, content, visual editing, build) |
+| `migrate-to-cloudcannon`     | Full migration orchestrator   | Migrating a site to CloudCannon end-to-end (audit, configure, content, visual editing, build) |
 | `cloudcannon-configuration`  | CloudCannon config setup      | Setting up `cloudcannon.config.yml`, collections, inputs, structures, or the CloudCannon CLI  |
 | `cloudcannon-snippets`       | Snippet configuration         | Configuring MDX components or inline HTML for CloudCannon's Content Editor                    |
 | `cloudcannon-visual-editing` | Visual Editor support         | Adding editable regions so page content can be edited inline in CloudCannon's Visual Editor   |
 | `brainstorming`              | Structured design exploration | Exploring intent, requirements, and tradeoffs before implementation                           |
 | `make-site-multilingual`     | Rosey multilingual setup      | Making a site translatable with Rosey, plus the CloudCannon connector (RCC) editing layer     |
-| `translate-multilingual`     | AI translation                | Filling in or updating Rosey locale files and per-locale content directories                  |
+| `translate-site`             | AI translation                | Filling in or updating Rosey locale files and per-locale content directories                  |
 
-For a full migration, start with `migrating-to-cloudcannon` -- it orchestrates the other skills at the right time. The standalone skills (`cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`) are useful when you only need one piece, e.g. "add visual editing to my existing CloudCannon site".
+For a full migration, start with `migrate-to-cloudcannon` -- it orchestrates the other skills at the right time. The standalone skills (`cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`) are useful when you only need one piece, e.g. "add visual editing to my existing CloudCannon site".
 
-The two multilingual skills sit outside the five-phase migration flow -- they apply to a site that is already on CloudCannon, or to one that never migrates. Use `make-site-multilingual` to set up Rosey, then `translate-multilingual` to fill in the translations.
+The two multilingual skills sit outside the five-phase migration flow -- they apply to a site that is already on CloudCannon, or to one that never migrates. Use `make-site-multilingual` to set up Rosey, then `translate-site` to fill in the translations.
 
 ## How it works
 
@@ -85,7 +85,7 @@ Not every site needs all phases. Small sites may skip content restructuring. Vis
 
 ```
 skills/
-  migrating-to-cloudcannon/         # Migration orchestrator
+  migrate-to-cloudcannon/         # Migration orchestrator
   cloudcannon-configuration/        # Config skill (standalone)
   cloudcannon-snippets/             # Snippets skill (standalone)
   cloudcannon-visual-editing/       # Visual editing skill (standalone)
@@ -93,7 +93,7 @@ skills/
   make-site-multilingual/           # Rosey + RCC setup (standalone, outside the migration phases)
     tagging.md                      # Phase 3 in full — data-rosey authoring rules
     troubleshooting.md              # Symptom-driven diagnosis
-  translate-multilingual/           # AI translation of locale files and content (standalone)
+  translate-site/           # AI translation of locale files and content (standalone)
 ```
 
 ### Key conventions
@@ -102,7 +102,7 @@ skills/
 - **Just-in-time reading** -- Agents read docs as needed during each phase rather than loading everything upfront. The skills are structured to support this.
 - **Architecture and writing style** -- [STYLE.md](STYLE.md) governs both: where a file goes (skills are concerns, SSGs are subdirectories, every skill has a tier) and what goes in it (front-load rules, prefer tables and checklists over prose, one canonical source per rule).
 
-For a detailed walkthrough of how agents traverse the skill files, see [GUIDE.md](skills/migrating-to-cloudcannon/GUIDE.md).
+For a detailed walkthrough of how agents traverse the skill files, see [GUIDE.md](skills/migrate-to-cloudcannon/GUIDE.md).
 
 ### Development
 

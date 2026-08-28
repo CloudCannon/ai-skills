@@ -21,7 +21,7 @@ Step-by-step workflow for making a single-language site translatable with **Rose
 
 ## When not to use
 
-- **Filling in translations** on a site that is already Rosey-ready — that's [`translate-multilingual`](../translate-multilingual/SKILL.md)
+- **Filling in translations** on a site that is already Rosey-ready — that's [`translate-site`](../translate-site/SKILL.md)
 - **General CloudCannon configuration** unrelated to locales — that's [`cloudcannon-configuration`](../cloudcannon-configuration/SKILL.md)
 - **Setting up editable regions themselves** — that's [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md). This skill covers only where `data-rosey` and regions interact.
 
@@ -40,7 +40,7 @@ Step-by-step workflow for making a single-language site translatable with **Rose
 
 Keep these separate in your head. They are installed together but do different jobs, and only the first is required.
 
-1. **Rosey-ready (required).** Rosey is an open-source, framework-agnostic tool that operates on your **built HTML**. You tag translatable elements with `data-rosey`, and a postbuild pipeline generates a key/value file per locale (`rosey/locales/{code}.json`) and builds translated copies of the site at `/{locale}/` URLs. This works on any SSG with no CMS. Once a site is Rosey-ready, translations can be filled in by **AI** (see the [`translate-multilingual`](../translate-multilingual/SKILL.md) skill), by hand, or by any external service.
+1. **Rosey-ready (required).** Rosey is an open-source, framework-agnostic tool that operates on your **built HTML**. You tag translatable elements with `data-rosey`, and a postbuild pipeline generates a key/value file per locale (`rosey/locales/{code}.json`) and builds translated copies of the site at `/{locale}/` URLs. This works on any SSG with no CMS. Once a site is Rosey-ready, translations can be filled in by **AI** (see the [`translate-site`](../translate-site/SKILL.md) skill), by hand, or by any external service.
 
 2. **The RCC visual-editing layer (optional).** The RCC is a client-side script that bridges those locale files to CloudCannon's Visual Editor, giving editors a floating locale switcher and inline ProseMirror editors on every `data-rosey` element, with stale-translation detection. It **requires CloudCannon** as the CMS. If the site isn't on CloudCannon, skip every RCC/CloudCannon step and translate the locale files another way.
 
@@ -202,7 +202,7 @@ What each step does:
 
 ## Phase 5: Add the RCC + CloudCannon layer (optional)
 
-> **(RCC layer)** — skip this entire phase if the site isn't on CloudCannon. The site is already translatable via the Phase 4 pipeline; fill in the locale files with the [`translate-multilingual`](../translate-multilingual/SKILL.md) skill or any other method.
+> **(RCC layer)** — skip this entire phase if the site isn't on CloudCannon. The site is already translatable via the Phase 4 pipeline; fill in the locale files with the [`translate-site`](../translate-site/SKILL.md) skill or any other method.
 
 ### 5a. Import the RCC in the root layout
 
@@ -402,7 +402,7 @@ For pages with large body content (blog posts, articles, docs), a single Rosey k
 
 1. **Create per-locale content directories** mirroring the default-language collection (`blog/` → `blog_fr/`, `blog_de/`). Seed with copies of the English files.
 2. **Register the locale collections with the SSG**, same schema as the English collection.
-3. **Create locale routes** so the SSG builds `/{locale}/blog/{slug}/`. **MUST derive the slug from the filename, never from the translated title.** Every locale's copy of a post shares one URL path. A title-derived slug forks the path per locale and breaks the locale picker, `hreflang`, tag links, step 5's root-stripping, and `translate-multilingual`'s same-filename pairing of source to locale copy.
+3. **Create locale routes** so the SSG builds `/{locale}/blog/{slug}/`. **MUST derive the slug from the filename, never from the translated title.** Every locale's copy of a post shares one URL path. A title-derived slug forks the path per locale and breaks the locale picker, `hreflang`, tag links, step 5's root-stripping, and `translate-site`'s same-filename pairing of source to locale copy.
 4. **Extract shared rendering logic** and pass `locale` for locale-aware links, dates, and collection selection.
 5. **Align Rosey roots** — locale pages must set `data-rosey-root` to the **English-equivalent** path (`blog/my-post`, not `fr/blog/my-post`) via a `roseyRoot` override that strips the locale prefix. Deriving the root from source identity ([§3e](tagging.md#3e-derive-the-root-from-the-templates-source-identity)) makes this nearly free.
 6. **Scope every content query to one locale.** Once per-locale directories exist, any ambient query mixes languages: taxonomy term collections, RSS feeds, sitemaps, "recent posts" sidebars, search indexes. Build per-`(term, locale)` groupings from that locale's own content. **Why:** the query still returns results and the page still builds — a French tag page just quietly lists English posts. Verified on Astro and Eleventy; SSGs with native i18n routing may scope by language already, so check before hand-rolling it.
@@ -430,7 +430,7 @@ Build the list from the locale config rather than hardcoding it, so adding a lan
 
 Note the difference from **`data-rcc-ignore`**, which opts a _single_ `data-rosey` element out of switching (§3c). `data-rcc-exclude` works per page, on the boundary, and takes locale codes.
 
-The locale collection files themselves get translated with the [**`translate-multilingual`**](../translate-multilingual/SKILL.md) skill (its content-collections workflow). **Read the SSG-specific file** for routing, collection setup, and suppression details.
+The locale collection files themselves get translated with the [**`translate-site`**](../translate-site/SKILL.md) skill (its content-collections workflow). **Read the SSG-specific file** for routing, collection setup, and suppression details.
 
 ## Phase 9: Visitor-facing locale picker (optional)
 

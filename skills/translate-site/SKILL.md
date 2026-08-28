@@ -1,5 +1,5 @@
 ---
-name: translate-multilingual
+name: translate-site
 description: >-
   Translate a Rosey-ready site with AI. Covers Rosey locale JSON files
   (untranslated + stale entries) and split-by-directory content collection files
@@ -86,7 +86,7 @@ This skill ships helper scripts that do the mechanical work (classification, tra
 ### Phase 1.1: Prepare
 
 ```bash
-node skills/translate-multilingual/scripts/prepare-translation.mjs --locale fr
+node skills/translate-site/scripts/prepare-translation.mjs --locale fr
 ```
 
 The script:
@@ -137,7 +137,7 @@ After translating, write the task file back to the same path with `value` fields
 ### Phase 1.3: Merge
 
 ```bash
-node skills/translate-multilingual/scripts/merge-translation.mjs --locale fr
+node skills/translate-site/scripts/merge-translation.mjs --locale fr
 ```
 
 The script:
@@ -207,7 +207,7 @@ First identify the source and locale directories: look for `{collection}_{locale
 Then, per locale collection:
 
 ```bash
-node skills/translate-multilingual/scripts/prepare-content-translation.mjs \
+node skills/translate-site/scripts/prepare-content-translation.mjs \
   --source-dir src/content/blog \
   --locale-dir src/content/blog_fr \
   --locale fr
@@ -273,7 +273,7 @@ Write the manifest back with `translated_frontmatter` / `translated_body` added.
 ### Phase 2.3: Merge
 
 ```bash
-node skills/translate-multilingual/scripts/merge-content-translation.mjs \
+node skills/translate-site/scripts/merge-content-translation.mjs \
   --input src/content/.translation-task-fr-content.json
 ```
 

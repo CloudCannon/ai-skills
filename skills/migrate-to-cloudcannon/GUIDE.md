@@ -12,7 +12,7 @@ The migration is split across four skills:
 
 | Skill                        | Purpose                                                         | Standalone?                              |
 | ---------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
-| `migrating-to-cloudcannon`   | Orchestrator — phases, SSG detection, handoff                   | No — orchestrates the others             |
+| `migrate-to-cloudcannon`     | Orchestrator — phases, SSG detection, handoff                   | No — orchestrates the others             |
 | `cloudcannon-configuration`  | CC config, CloudCannon CLI, structures, collection URLs, inputs | Yes — "configure my site for CC"         |
 | `cloudcannon-snippets`       | Snippet config for MDX components and inline HTML               | Yes — "add snippets to my CC site"       |
 | `cloudcannon-visual-editing` | Editable regions, Visual Editor setup                           | Yes — "add visual editing to my CC site" |
@@ -24,12 +24,12 @@ Two more skills live in this repo but are **not** part of the five-phase migrati
 | Skill                    | Purpose                                                   | Read when                                                    |
 | ------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
 | `make-site-multilingual` | Rosey setup, `data-rosey` tagging, the RCC editing layer  | The site needs to be translatable                            |
-| `translate-multilingual` | AI translation of locale JSON and per-locale content dirs | Rosey is already set up and the locale files need filling in |
+| `translate-site`         | AI translation of locale JSON and per-locale content dirs | Rosey is already set up and the locale files need filling in |
 
 ## File Map
 
 ```
-── migrating-to-cloudcannon (orchestrator) ────────────────────
+── migrate-to-cloudcannon (orchestrator) ─────────────────────
 SKILL.md                                ENTRY POINT — phases, SSG table, handoff, naming conventions
 GUIDE.md                                THIS FILE — orientation for humans
 astro/overview.md                       ENTRY POINT for Astro — phase links
@@ -41,7 +41,7 @@ astro/page-building.md                  Phase 2/4: pages collection, page builde
 scripts/README.md                       Script inventory
 scripts/*.sh                            Automation scripts (audit, rename)
 
-── cloudcannon-configuration ──────────────────────────────────
+── cloudcannon-configuration ─────────────────────────────────
 SKILL.md                                Entry point — CloudCannon CLI, collections, inputs, structures
 cloudcannon-cli-guide.md                CloudCannon CLI commands and options
 structures.md                           Structures — inline vs split, previews, field completeness
@@ -50,7 +50,7 @@ astro/overview.md                       ENTRY POINT for Astro — reading order
 astro/configuration.md                  Phase 2: CC config, schemas, inputs, add options
 astro/configuration-gotchas.md          Phase 2 gotchas: icon fields, numeric values, etc.
 
-── cloudcannon-snippets ───────────────────────────────────────
+── cloudcannon-snippets ──────────────────────────────────────
 SKILL.md                                Entry point — when/why/which approach
 snippets.md                             Snippet concepts — config patterns, raw HTML snippets
 astro/overview.md                       ENTRY POINT for Astro — MDX stack, auto-import
@@ -59,7 +59,7 @@ raw.md                                  Raw snippet syntax, all parser types
 built-in-templates.md                   MDX templates vs import bundle, parser internals
 gotchas.md                              Snippet pitfalls and debugging
 
-── cloudcannon-visual-editing ─────────────────────────────────
+── cloudcannon-visual-editing ────────────────────────────────
 SKILL.md                                Entry point — region types, workflow, checklist
 editable-regions.md                     Region types, attribute reference, decision tree
 editable-regions-internals.md           ON DEMAND — lifecycle trace, JS API, quirks
@@ -68,7 +68,7 @@ astro/visual-editing.md                 Phase 4: workflow, census, checklists
 astro/visual-editing-reference.md       Phase 4: pattern reference (read on demand)
 scripts/setup-editable-regions.sh       Installs package, wires Astro integration
 
-── make-site-multilingual (outside the migration phases) ──────
+── make-site-multilingual (outside the migration phases) ─────
 SKILL.md                                Entry point — the 9 phases, RCC layer, gotchas, v1→v2 upgrade
 tagging.md                              Phase 3 in full — every data-rosey/-ns/-root authoring rule
 troubleshooting.md                      Symptom → cause → fix for builds that translate wrongly
@@ -76,7 +76,7 @@ astro/overview.md                       Astro-specific: root derivation, head/SE
 eleventy/overview.md                    Eleventy-specific tagging, taxonomy scoping, link localization
 hugo/overview.md                        Hugo-specific tagging and pipeline (partial — see its coverage note)
 
-── translate-multilingual (outside the migration phases) ──────
+── translate-site (outside the migration phases) ─────────────
 SKILL.md                                Entry point — locale JSON (Part 1), content dirs (Part 2)
 scripts/README.md                       Script inventory
 scripts/*.mjs                           prepare/merge for locale files and content
@@ -86,34 +86,34 @@ scripts/*.mjs                           prepare/merge for locale files and conte
 
 ### Phase 1: Audit
 
-1. `migrating-to-cloudcannon/SKILL.md` → detect SSG
-2. `migrating-to-cloudcannon/astro/overview.md` → phase summary
-3. `migrating-to-cloudcannon/astro/audit.md` → full audit procedure
+1. `migrate-to-cloudcannon/SKILL.md` → detect SSG
+2. `migrate-to-cloudcannon/astro/overview.md` → phase summary
+3. `migrate-to-cloudcannon/astro/audit.md` → full audit procedure
 
 ### Phase 2: Configuration
 
 1. `cloudcannon-configuration/cloudcannon-cli-guide.md` → generate baseline
 2. `cloudcannon-configuration/astro/configuration.md` → customize config
 3. `cloudcannon-configuration/collection-urls.md` → if any collection produces pages
-4. `migrating-to-cloudcannon/astro/page-building.md` → if audit identified pages for content collection or page builder
+4. `migrate-to-cloudcannon/astro/page-building.md` → if audit identified pages for content collection or page builder
 5. `cloudcannon-configuration/structures.md` → if site has array-based components (3+ block types)
 6. `cloudcannon-snippets/SKILL.md` → if site uses MDX components or inline HTML in content
 7. `cloudcannon-configuration/astro/configuration-gotchas.md` → reference during and after configuration
 
 ### Phase 3: Content
 
-1. `migrating-to-cloudcannon/astro/content.md`
+1. `migrate-to-cloudcannon/astro/content.md`
 2. `cloudcannon-configuration/structures.md` → field completeness rule
 
 ### Phase 4: Visual Editing
 
 1. `cloudcannon-visual-editing/SKILL.md` → overview and quick reference
 2. `cloudcannon-visual-editing/astro/visual-editing.md` → full Astro integration workflow
-3. `migrating-to-cloudcannon/astro/page-building.md` → if page builder (BlockRenderer, array editables)
+3. `migrate-to-cloudcannon/astro/page-building.md` → if page builder (BlockRenderer, array editables)
 
 ### Phase 5: Build
 
-1. `migrating-to-cloudcannon/astro/build.md`
+1. `migrate-to-cloudcannon/astro/build.md`
 
 ## Decision Tree: When to Read Optional Docs
 
@@ -148,7 +148,7 @@ Is a page not loading in the visual editor?
 Does the site need to serve more than one language?
 ├─ Yes → read make-site-multilingual (independent of the migration phases)
 │        Are there locale files or per-locale content dirs to fill in?
-│        ├─ Yes → translate-multilingual
+│        ├─ Yes → translate-site
 │        └─ No  → finish the Rosey setup first
 └─ No  → skip both multilingual skills
 ```

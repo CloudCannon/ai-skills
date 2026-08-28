@@ -232,7 +232,7 @@ Most Astro templates store images as simple string paths, so `data-prop-src` is 
 
 When the user clicks the image in the visual editor, CloudCannon opens the image picker. The `<img>` src is updated live.
 
-**Image location and optimization:** Optimized images belong in `src/assets/`, not `public/`. Frontmatter stores the full repo-relative path (e.g. `/src/assets/images/hero.webp`). Components use `import.meta.glob` to resolve the string to `ImageMetadata` at build time (see [content.md § Resolving optimized image paths](../../migrating-to-cloudcannon/astro/content.md#resolving-optimized-image-paths-from-frontmatter)). Don't downgrade to `<img>` just because the path comes from frontmatter.
+**Image location and optimization:** Optimized images belong in `src/assets/`, not `public/`. Frontmatter stores the full repo-relative path (e.g. `/src/assets/images/hero.webp`). Components use `import.meta.glob` to resolve the string to `ImageMetadata` at build time (see [content.md § Resolving optimized image paths](../../migrate-to-cloudcannon/astro/content.md#resolving-optimized-image-paths-from-frontmatter)). Don't downgrade to `<img>` just because the path comes from frontmatter.
 
 **Upload paths:** Configure per-input upload paths so optimized images go to `src/assets/images` while unoptimized use the global `public/` path. The per-input `static: ''` is critical — without it, CloudCannon strips the path prefix and `import.meta.glob` can't resolve the image. See [configuration.md § Image path configuration](../../cloudcannon-configuration/astro/configuration.md#image-path-configuration) for the full setup with YAML examples.
 
@@ -384,7 +384,7 @@ A `data-editable="array"` wrapper treats every direct child as an `array-item` �
 
 ## Page builder blocks
 
-For the structural setup (array wrapper, BlockRenderer, catch-all route, CC config), see [page-building.md](../../migrating-to-cloudcannon/astro/page-building.md). This section covers the **visual editing layers** that go on top of that structure.
+For the structural setup (array wrapper, BlockRenderer, catch-all route, CC config), see [page-building.md](../../migrate-to-cloudcannon/astro/page-building.md). This section covers the **visual editing layers** that go on top of that structure.
 
 Each block needs **three layers**: (1) array wrapper, (2) array items with component behaviour, (3) nested editables. Agents commonly add the array wrapper but miss the component layer or nested editables. See the [CloudCannon complex array docs](https://cloudcannon.com/documentation/developer-guides/set-up-visual-editing/visually-edit-complex-arrays-and-page-building/) for the canonical reference.
 
@@ -637,7 +637,7 @@ Blog post detail pages typically have a hero section (title, date, author, image
 </div>
 ```
 
-**When the author is a select referencing a separate data file** (the common pattern — see [cc-friendly-conventions.md § Author strategy](../../migrating-to-cloudcannon/astro/cc-friendly-conventions.md#author-strategy)) and the rendered card shows the resolved name/avatar/bio, a plain `<editable-text data-prop="author">` only updates the visible slug — it can't update the avatar or bio because those come from a different file. Use the registered-component pattern in [Cross-collection select inputs](#cross-collection-select-inputs) instead.
+**When the author is a select referencing a separate data file** (the common pattern — see [cc-friendly-conventions.md § Author strategy](../../migrate-to-cloudcannon/astro/cc-friendly-conventions.md#author-strategy)) and the rendered card shows the resolved name/avatar/bio, a plain `<editable-text data-prop="author">` only updates the visible slug — it can't update the avatar or bio because those come from a different file. Use the registered-component pattern in [Cross-collection select inputs](#cross-collection-select-inputs) instead.
 
 **Shared PageHeader components.** When the blog detail page uses a shared `PageHeader` component (common in starter themes), the editable attributes still need to reach the rendered elements. Don't mark the hero as "sidebar-only" just because the component is shared. Instead, add optional prop-path parameters to the PageHeader (e.g. `titleProp`, `subtitleProp`, `imageProp`) that conditionally render `data-editable` attributes when provided. Callers pass the frontmatter field name (e.g. `titleProp="title"`); pages without that field in their data scope omit the prop. This keeps PageHeader reusable while enabling inline editing where the data supports it.
 
@@ -658,7 +658,7 @@ _inputs:
 
 Source editables work by reading and writing the raw source file (e.g. `src/pages/index.astro`) directly. They don't need a content collection or data file -- just a `data-path` pointing to the source file and a `data-key` to identify the region within it.
 
-**Source-editable is for long-form prose, not for any hardcoded string.** Unique-layout pages with 2+ structured sections belong in a page-builder `pages` collection, not pinned to the `.astro` source. See [migrating-to-cloudcannon/astro/page-building.md § When to reach for page builder](../../migrating-to-cloudcannon/astro/page-building.md#when-to-reach-for-page-builder).
+**Source-editable is for long-form prose, not for any hardcoded string.** Unique-layout pages with 2+ structured sections belong in a page-builder `pages` collection, not pinned to the `.astro` source. See [migrate-to-cloudcannon/astro/page-building.md § When to reach for page builder](../../migrate-to-cloudcannon/astro/page-building.md#when-to-reach-for-page-builder).
 
 ### When to use source editables
 
@@ -712,14 +712,14 @@ Pages with source editables should be included in the pages collection so editor
 
 ### Identifying source editable candidates during audit
 
-During Phase 1, run hardcoded text through the [audit.md classification census](../../migrating-to-cloudcannon/astro/audit.md#classifying-static-pages-source-editables-vs-content-collection) before reaching for source-editable. Most "hardcoded text" candidates -- homepage heroes, CTA sections, section headings -- belong in a page-builder `pages` collection entry, not pinned to the `.astro` source.
+During Phase 1, run hardcoded text through the [audit.md classification census](../../migrate-to-cloudcannon/astro/audit.md#classifying-static-pages-source-editables-vs-content-collection) before reaching for source-editable. Most "hardcoded text" candidates -- homepage heroes, CTA sections, section headings -- belong in a page-builder `pages` collection entry, not pinned to the `.astro` source.
 
 Source-editable is the right tool only when:
 
 - The page is mostly long-form prose with 1-2 inline strings to edit (e.g. a hero headline above a markdown body), AND
 - There are 1-2 pages of this type with no plans to add more
 
-Footer taglines and other shared-UI text are not source-editable candidates -- they belong in a data file. See [migrating-to-cloudcannon/astro/cc-friendly-conventions.md § Shared-UI treatment table](../../migrating-to-cloudcannon/astro/cc-friendly-conventions.md#shared-ui-treatment-table).
+Footer taglines and other shared-UI text are not source-editable candidates -- they belong in a data file. See [migrate-to-cloudcannon/astro/cc-friendly-conventions.md § Shared-UI treatment table](../../migrate-to-cloudcannon/astro/cc-friendly-conventions.md#shared-ui-treatment-table).
 
 ## Astro components in source editables
 
@@ -999,7 +999,7 @@ registerAstroComponent("call-to-action", CallToAction);
 
 ### Non-Astro framework components
 
-Only `.astro` and React components are supported (see [overview.md § Astro scope](../../migrating-to-cloudcannon/astro/overview.md#astro-scope)).
+Only `.astro` and React components are supported (see [overview.md § Astro scope](../../migrate-to-cloudcannon/astro/overview.md#astro-scope)).
 
 **Decision: convert or provide an editing fallback.** For each unsupported component, decide whether to convert it to a supported framework or keep it and provide a fallback:
 

@@ -149,7 +149,7 @@ See the SSG-specific file for a working picker.
 
 ## A split-by-directory file is skipped on every later translation run
 
-**Cause:** you edited the source-language post _after_ its locale copy was translated. [`translate-multilingual`](../translate-multilingual/SKILL.md) Part 2 classifies a file as either untranslated or already-translated — the classification is **binary**, with no stale state and no amber badge.
+**Cause:** you edited the source-language post _after_ its locale copy was translated. [`translate-site`](../translate-site/SKILL.md) Part 2 classifies a file as either untranslated or already-translated — the classification is **binary**, with no stale state and no amber badge.
 
 **Why it's silent:** the locale copy still differs from source, so it stays classified "already translated" and every later run skips it. The Part 1 locale JSON _does_ have staleness detection; Part 2 does not.
 

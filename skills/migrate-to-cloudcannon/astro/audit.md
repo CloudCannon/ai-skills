@@ -3,7 +3,7 @@
 Run the audit script first to gather data automatically:
 
 ```bash
-bash skills/migrating-to-cloudcannon/scripts/audit-astro.sh .
+bash skills/migrate-to-cloudcannon/scripts/audit-astro.sh .
 ```
 
 Use its output as a starting point, then fill in the sections below with findings that require judgment. Record findings in `.cloudcannon/migration/audit.md`.
