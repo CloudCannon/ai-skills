@@ -118,7 +118,12 @@ for (const r of editable) {
 
 	// --- Markdown regions ---
 	// A markdown region without data-type is perpetually stale and uneditable.
-	if (r.kind === "text" && /markdown|content|body/i.test(r.path ?? "") && !r.dataType) {
+	// Match the region's OWN key, not the whole path: every region nested under
+	// an array called `content_blocks` — the name the Astro starters use — has
+	// "content" somewhere in its path, so testing the full path warned on every
+	// heading and button label on the page.
+	const ownKey = (r.path ?? "").split(".").pop() ?? "";
+	if (r.kind === "text" && /markdown|content|body/i.test(ownKey) && !r.dataType) {
 		add("warn", r.address, "markdown-looking text region has no data-type (expect block or text)");
 	}
 }

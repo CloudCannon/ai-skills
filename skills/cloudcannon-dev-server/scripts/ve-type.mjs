@@ -55,7 +55,17 @@ await locator.scrollIntoViewIfNeeded().catch(() => {});
 await locator.click({ timeout: 15000 });
 await page.waitForTimeout(600);
 
-if (!flags.append) {
+if (flags.append) {
+	// The click above lands wherever the pointer hit — the centre of the
+	// element's box, which is the MIDDLE of the text, not its end. Without
+	// this the insert splices into the middle of the existing value and still
+	// reports "changed", so a broken append reads as a successful one:
+	//   append "[END]" to "You choose your editing experience."
+	//   -> "You choose yo[END]ur editing experience."
+	// Select all, then collapse the selection to its end.
+	await page.keyboard.press("ControlOrMeta+a");
+	await page.keyboard.press("ArrowRight");
+} else {
 	// ControlOrMeta, not Meta: Meta+a only selects all on macOS. On Linux it
 	// does nothing, so the insert below lands at the caret and the new text is
 	// spliced INTO the old rather than replacing it — and the check at the end
@@ -116,8 +126,28 @@ if (afterMatch && !flags.text.includes("<")) {
 		.first()
 		.evaluate((el) => el.innerHTML)
 		.catch(() => "");
-	const injected = html.match(/<(font|b|i|u|strike)\b[^>]*>|<[a-z]+[^>]*\sstyle="[^"]+"/gi);
-	if (injected) {
+	// A plain text region has no block structure to gain, so <div>/<br> in one
+	// means the browser turned newlines into markup. Typing (or pasting) three
+	// lines into a heading writes
+	//   heading: Line one<div>Line two</div><div>Line three</div>
+	// to the YAML — unescaped, unlike a "<" the user typed — and the built page
+	// then shows those tags as literal text.
+	//
+	// Only when the typed string actually contained a newline, and only for
+	// plain text regions — block regions legitimately wrap their content.
+	//
+	// ProseMirror's own separator/trailing-break nodes are editor scaffolding
+	// and never reach disk, so they are filtered out. Do NOT filter
+	// c-cloudcannon-locked-element the same way: the editor puts that class on
+	// the div it makes for the line break, then strips the class and keeps the
+	// div on save — it is the corruption, not chrome.
+	const plainText = match.kind === "text" && !match.dataType;
+	const brokeLines = plainText && /[\r\n]/.test(flags.text);
+	const carriers = brokeLines ? "font|b|i|u|strike|div|br" : "font|b|i|u|strike";
+	const injected = (
+		html.match(new RegExp(`<(${carriers})\\b[^>]*>|<[a-z]+[^>]*\\sstyle="[^"]+"`, "gi")) ?? []
+	).filter((tag) => !/ProseMirror/.test(tag));
+	if (injected.length) {
 		console.log(
 			`\nwarning: the region gained formatting markup that "${flags.text}" does not contain:\n  ${[...new Set(injected)].join("\n  ")}\nThe value on disk is not the plain text above.`,
 		);
