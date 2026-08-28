@@ -146,7 +146,7 @@ Work through every item after implementing editable regions. Each item links to 
 - [ ] **`_inputs` presence audit:** grep `data-prop=` in every template; grep `_inputs:` in the collection config; diff the keys. Every `data-editable` region must have a matching `_inputs` entry — missing entry → visual-editor errors on entries whose frontmatter has the field populated.
 - [ ] **Schema-file seed audit:** every field the template wires must appear in `.cloudcannon/schemas/<collection>.md` default frontmatter with a sensible placeholder. Otherwise "Add new" creates pages missing half their editable regions.
 - [ ] **Markdown body content**: Pages rendering markdown body (via `<Content />`, `entry.render()`, or `<slot />` in layouts) have `data-editable="text" data-type="block" data-prop="@content"` on the wrapper element
-      → [Content body editing](visual-editing-reference.md#content-body-editing)
+      → [Text editing](visual-editing-reference.md#text-editing)
 - [ ] **Slot content hosts**: Editable slot content uses a concrete DOM host (`<editable-text>`, `<span>`) not `<Fragment>`
       → [Text editing](visual-editing-reference.md#text-editing)
 - [ ] **Source editables**: Hardcoded text in page templates has `data-editable="source"` with `data-path` and `data-key`.

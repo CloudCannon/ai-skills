@@ -4,7 +4,7 @@ Common patterns and pitfalls discovered during Astro migrations.
 
 **Quick reference for the four most-missed rules:**
 
-1. Array item previews: `[*]` only for plain arrays — structured arrays need preview on the structure value ([§ Array item previews](#array-item-previews--vs-structure-value))
+1. Array item previews: `[*]` only for plain arrays — structured arrays need preview on the structure value ([§ Array item previews](#array-item-previews---vs-structure-value))
 2. Every `type: markdown` needs explicit `options:` ([SKILL.md common mistakes](../SKILL.md#common-mistakes))
 3. Data files that hold like-shaped items must be arrays, not objects keyed by slug ([configuration.md § Content specifics](configuration.md#content-specifics))
 4. Divergent top-level keys break structure matching ([structures.md § Common mistakes](../structures.md#common-mistakes))
@@ -348,7 +348,7 @@ A common case: data files handled via `data_config` still need to belong to a co
 
 ## Always link arrays to structures explicitly
 
-See [structures.md § Mandatory rules](../structures.md#mandatory-rules-read-first) — every array input needs `type: array` + `options.structures: _structures.<name>` (full path, not bare name).
+See [structures.md § Mandatory rules](../structures.md#the-four-rules-read-first) — every array input needs `type: array` + `options.structures: _structures.<name>` (full path, not bare name).
 
 ## Add preview icon fallbacks on structures
 

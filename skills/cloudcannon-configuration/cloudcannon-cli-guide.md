@@ -153,7 +153,7 @@ CloudCannon’s configuration schemas are published on the [JSON Schema Store](h
 }
 ```
 
-When working outside an IDE (e.g. as an AI agent), download the schema and query it with `jq`. See [SKILL.md § JSON Schemas](SKILL.md#json-schemas) for the download command and query patterns. The schema is saved to `.cloudcannon/migration/cloudcannon-config.latest.schema.json` so it persists across agent turns (kept under `.cloudcannon/` so the CLI doesn't detect the folder as a collection).
+When working outside an IDE (e.g. as an AI agent), download the schema and query it with `jq`. See [SKILL.md § JSON Schemas](SKILL.md#do-this-before-writing-any-configuration) for the download command and query patterns. The schema is saved to `.cloudcannon/migration/cloudcannon-config.latest.schema.json` so it persists across agent turns (kept under `.cloudcannon/` so the CLI doesn't detect the folder as a collection).
 
 ## File Placement
 

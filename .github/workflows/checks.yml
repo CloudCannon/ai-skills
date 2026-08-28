@@ -1,4 +1,4 @@
-name: Format
+name: Checks
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  prettier:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,4 +15,8 @@ jobs:
           node-version: "20"
           cache: "npm"
       - run: npm ci
-      - run: npm run format:check
+      - name: Formatting
+        run: npm run format:check
+      - name: Links and anchors
+        if: "!cancelled()"
+        run: npm run check:links

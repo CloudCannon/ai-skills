@@ -119,7 +119,7 @@ Pick the option that matches the source pattern (preference order top → bottom
 
 ### Page-builder content migration
 
-Every field from a block's structure `value` appears in content frontmatter, even if empty. See [structures.md § Mandatory rules](../../cloudcannon-configuration/structures.md#mandatory-rules-read-first). The visual editor throws `undefined` errors when editable regions reference fields missing from frontmatter. Getting this right now avoids a backfill step later.
+Every field from a block's structure `value` appears in content frontmatter, even if empty. See [structures.md § Mandatory rules](../../cloudcannon-configuration/structures.md#the-four-rules-read-first). The visual editor throws `undefined` errors when editable regions reference fields missing from frontmatter. Getting this right now avoids a backfill step later.
 
 #### Extraction pattern (per block)
 
@@ -275,8 +275,8 @@ Set `disable_url: true` on data collections. They don't produce pages; without t
 
 Run this checklist on every content file before marking the content phase complete.
 
-- [ ] **Field completeness (CRITICAL):** Every block in `content_blocks` includes ALL fields from its structure definition — cross-reference field-by-field against [structures.md § Mandatory rules](../../cloudcannon-configuration/structures.md#mandatory-rules-read-first). Common misses: `tagline`, `content`, `subtitle`, and nested sub-keys like `callToAction.variant`.
+- [ ] **Field completeness (CRITICAL):** Every block in `content_blocks` includes ALL fields from its structure definition — cross-reference field-by-field against [structures.md § Mandatory rules](../../cloudcannon-configuration/structures.md#the-four-rules-read-first). Common misses: `tagline`, `content`, `subtitle`, and nested sub-keys like `callToAction.variant`.
 - [ ] Fields not present in the original page are set to empty/default values (strings empty, booleans `false`, arrays `[]`).
 - [ ] Frontmatter strings contain no block-level HTML (`<br />`, `<p>`, `<ul>`) unless the matching `_inputs` entry uses a rich-text or markdown input.
-- [ ] Every array inside a structure-value file links to its `_structures` entry via an explicit `_inputs` block. (Canonical rule: [structures.md § Mandatory rules](../../cloudcannon-configuration/structures.md#mandatory-rules-read-first).)
+- [ ] Every array inside a structure-value file links to its `_structures` entry via an explicit `_inputs` block. (Canonical rule: [structures.md § Mandatory rules](../../cloudcannon-configuration/structures.md#the-four-rules-read-first).)
 - [ ] For each JSON data file, every visible/configurable value (icons, link targets, label text, image paths) the editor would reasonably change lives in the data file — not hardcoded in the component template.
