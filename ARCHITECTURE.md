@@ -28,6 +28,7 @@ One CloudCannon feature each. Reference-shaped — delegated to by a journey, or
 | `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures | [SKILL.md](skills/cloudcannon-configuration/SKILL.md)  |
 | `cloudcannon-snippets`       | MDX components and inline HTML in the Content Editor      | [SKILL.md](skills/cloudcannon-snippets/SKILL.md)       |
 | `cloudcannon-visual-editing` | Editable regions for the Visual Editor                    | [SKILL.md](skills/cloudcannon-visual-editing/SKILL.md) |
+| `cloudcannon-dev-server`     | Build, serve and verify a site under `cloudcannon dev`    | [SKILL.md](skills/cloudcannon-dev-server/SKILL.md)     |
 
 ### Operations
 
@@ -108,6 +109,13 @@ astro/overview.md                       ENTRY POINT for Astro — reading order
 astro/visual-editing.md                 Phase 4: workflow, census, checklists
 astro/visual-editing-reference.md       ON DEMAND — pattern reference, do not read front to back
 scripts/setup-editable-regions.sh       Installs package, wires Astro integration
+
+── cloudcannon-dev-server (capability) ───────────────────────
+SKILL.md                                ENTRY POINT — the build-first rule, quick start, scripts
+setup.md                                Prerequisites, what `cloudcannon dev` does, build/serve, ports
+dev-server-api.md                       The `/__api` surface, events, proving a write landed
+troubleshooting.md                      Symptom → cause → fix for the server itself
+scripts/*.mjs, cc-serve.sh              Build/serve, freshness, read/write, write proof
 
 ── translate-site (operation) ────────────────────────────────
 SKILL.md                                ENTRY POINT — which part applies

@@ -1,6 +1,6 @@
 {
   "name": "agent-skills",
-  "description": "Agent skills for CloudCannon sites: migrating an SSG site onto CloudCannon, configuration, visual editing, snippets, multilingual setup with Rosey, and AI translation.",
+  "description": "Agent skills for CloudCannon sites: migrating an SSG site onto CloudCannon, configuration, visual editing, snippets, multilingual setup with Rosey, AI translation, and running the site locally with the CloudCannon dev server.",
   "version": "0.2.0",
   "author": {
     "name": "CloudCannon",
@@ -20,6 +20,8 @@
     "i18n",
     "rosey",
     "translation",
+    "dev-server",
+    "local-preview",
     "static-site-generator"
   ]
 }
