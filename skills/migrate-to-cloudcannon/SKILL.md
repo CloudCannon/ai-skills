@@ -1,5 +1,5 @@
 ---
-name: migrating-to-cloudcannon
+name: migrate-to-cloudcannon
 description: >-
   Migrate an existing SSG site to work with CloudCannon. Use when the user wants
   to onboard a site to CloudCannon, add CMS support, or make a template
@@ -11,6 +11,29 @@ description: >-
 This skill orchestrates a full migration of an existing SSG site to CloudCannon. It coordinates five phases, delegating domain-specific work to standalone skills that can also be used independently.
 
 > **Model recommendation:** Migrations involve multi-file architectural decisions across five phases. Use a high-reasoning model (not a fast/lightweight one) for best results.
+
+## When to use
+
+- An existing SSG site needs to work with CloudCannon end to end
+- A site template needs to be made CloudCannon-compatible
+- A site is being generated as part of the task (e.g. from WordPress) and should land CloudCannon-ready
+
+## When not to use
+
+- **The site is already on CloudCannon and needs one piece added** — go straight to the capability skill: [`cloudcannon-configuration`](../cloudcannon-configuration/SKILL.md), [`cloudcannon-snippets`](../cloudcannon-snippets/SKILL.md), or [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md)
+- **Only multilingual or translation work is wanted** — [`make-site-multilingual`](../make-site-multilingual/SKILL.md), then [`translate-site`](../translate-site/SKILL.md). Neither is part of the five phases.
+- **One CloudCannon feature is misbehaving on a working site** — the capability skill that owns it, not a full migration
+
+## Contents
+
+| File                                   | Covers                                                                  |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| **SKILL.md** (this file)               | The five phases, handoff readiness, naming conventions, common mistakes |
+| [astro/overview.md](astro/overview.md) | **Start here for Astro** — the per-phase guides                         |
+| [chunking.md](chunking.md)             | Splitting a large migration across several conversations                |
+| [handoff.md](handoff.md)               | Closing with the user — who tests what, and what to ask back            |
+| [reading-order.md](reading-order.md)   | Which docs to read in which phase, and when to skip them                |
+| [scripts/README.md](scripts/README.md) | Automation scripts for the deterministic steps                          |
 
 ## Supported SSGs
 
@@ -55,7 +78,7 @@ For each phase, in order:
 2. **TaskCreate** one task per checklist item in that phase doc. Set the task `in_progress` before starting it; mark `completed` only when the checklist item is satisfied. Do not batch-complete tasks at the end of the phase.
 3. **Do the work** — small, mechanical cross-phase fixes (adding a missing field, normalizing a value) are fine in any phase; structural changes (moving files, reorganizing collections, altering rendering) wait for their proper phase.
 4. **Write** `.cloudcannon/migration/<phase>.md` documenting decisions, findings, and anything the user should review.
-5. **Check the handoff readiness row below.** If it's met, the phase is safe to hand off to a fresh conversation. Whether you actually open a fresh conversation is a judgment call (see [Chunking](#chunking-large-migrations) below) — within one conversation, just continue.
+5. **Check the handoff readiness row below.** If it's met, the phase is safe to hand off to a fresh conversation. Whether you actually open a fresh conversation is a judgment call (see [chunking.md](chunking.md)) — within one conversation, just continue.
 
 **Why:** checklists catch things agents otherwise skim past — data collections missing from `collections_config`, `data_config` entries missing for referenced data files, blog/detail page editables skipped while focusing on page-builder blocks, arrays not linked to structures. TaskCreate makes the skim visible.
 
@@ -71,69 +94,6 @@ These rows define what must be true for a phase to be safely picked up by a fres
 | **4. Visual editing** | Every section flagged in the audit census as "needs editable region" has been wired or has a documented justification for not being wired. `registerComponents.ts` registers every component used inside a wrapped section. `.cloudcannon/migration/visual-editing.md` written. |
 | **5. Build and test** | Production build succeeds locally. User has run their CloudCannon-side verification (preview, inline edit, save-to-git). `.cloudcannon/migration/build.md` written.                                                                                                             |
 
-## Chunking large migrations
-
-Migrations can run end-to-end in one conversation, but on larger sites context fills up — quality drops in later phases (especially Phase 4 visual editing) when the agent is recalling decisions from earlier phases through a long backscroll. Chunking into fresh conversations is a way to avoid that.
-
-**Chunking is a suggestion, not a wall.** The agent doesn't _halt_ between phases — it tells the user "context is heavy; consider opening a fresh conversation for Phase N" and lets the user choose. If the user keeps going in the same conversation, that's fine.
-
-### When to suggest a fresh conversation
-
-At the end of Phase 1, evaluate the sizing thresholds against `.cloudcannon/migration/audit.md`:
-
-| Signal                                | Threshold | Source                                                                       |
-| ------------------------------------- | --------- | ---------------------------------------------------------------------------- |
-| Total pages                           | > 30      | Audit § Pages and routing                                                    |
-| Hardcoded `.astro` → YAML conversions | > 15      | Audit census table rows recommending page-builder or fixed-schema collection |
-| Distinct collections                  | > 5       | Audit § Content collections + new collections from census                    |
-
-If any 2 thresholds are tripped, write `.cloudcannon/migration/plan.md` using the template below, then suggest to the user that later phases run in fresh conversations. Phase 4 (visual editing) is the most context-hungry — it's the most likely candidate for a fresh start.
-
-| Shape                         | When                                                                                                            |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **Vertical (per-collection)** | Page-builder pages or unique-shape collections dominate — each unit has its own schema/visual-editing decisions |
-| **Horizontal (per-phase)**    | Collections are mostly uniform — repetitive per-collection work benefits from one mental model at a time        |
-
-### `.cloudcannon/migration/plan.md` template
-
-```markdown
-# Migration plan
-
-## Sizing
-
-- Total pages: <n> (threshold >30: <tripped|ok>)
-- Hardcoded → YAML conversions: <n> (threshold >15: <tripped|ok>)
-- Distinct collections: <n> (threshold >5: <tripped|ok>)
-- Tripped: <count>/3 → <chunked recommended|single-pass fine>
-
-## Shape (if chunking)
-
-<vertical|horizontal> — because: <one-line reason>
-
-## Chunks
-
-Each chunk is intended as a single agent run, ideally in a fresh conversation
-once context is heavy. The agent reads `.cloudcannon/migration/audit.md` + this file + the
-listed phase doc, then works the listed scope.
-
-| #   | Scope                            | Phase(s) | Inputs                     | Output artefact                           |
-| --- | -------------------------------- | -------- | -------------------------- | ----------------------------------------- |
-| 1   | <e.g. all collections — config>  | 2        | audit.md                   | cloudcannon.config.yml + configuration.md |
-| 2   | <e.g. blog collection — content> | 3        | audit.md, configuration.md | content.md (blog section)                 |
-| 3   | <...>                            | ...      | ...                        | ...                                       |
-
-## Global decisions locked in chunk 1 (do not revisit)
-
-- Collection URL patterns
-- Shared structures (`_structures`)
-- Snippet configs (if MDX/inline HTML)
-- `registerComponents.ts` setup
-```
-
-**Resumption brief** (paste into a fresh conversation): "Read `.cloudcannon/migration/audit.md`, `.cloudcannon/migration/plan.md`, and the phase doc(s) listed for chunk N. Work chunk N's scope. Write the output artefact and stop."
-
-**Repetition → script rule:** After migrating 2 entries of the same shape, write a throwaway script for the rest. 23 hand-conversions of the same article shape is wasted tokens and an error multiplier.
-
 ## Scripts
 
 Deterministic migration steps are automated as scripts in [scripts/](scripts/). Run these before or during the relevant phase.
@@ -141,51 +101,6 @@ Deterministic migration steps are automated as scripts in [scripts/](scripts/). 
 ## Migration notes
 
 All written to `.cloudcannon/migration/` (under `.cloudcannon/` so the CLI doesn't detect the folder as a collection): one file per phase (`audit.md`, `configuration.md`, `content.md`, `visual-editing.md`, `build.md`), plus `plan.md` if the migration is sectioned. See the per-phase workflow above for the gates that consume each file.
-
-## Handoff and verification
-
-### Testing boundaries
-
-| Check                                                              | Owner |
-| ------------------------------------------------------------------ | ----- |
-| Local build (`npm run build` or whatever `package.json` defines)   | Agent |
-| Builds, greps, small scripts, `dist/` inspection                   | Agent |
-| Fidelity checks in CloudCannon (preview, inline edit, save-to-git) | Human |
-
-Prefer asking the user to run CloudCannon verification over spinning up long-lived dev servers or heavy end-to-end testing in the agent session.
-
-### When to close with the user
-
-Close after a **meaningful chunk**, not every tiny edit. At minimum: when Phase 5 (Build and test) is done for a first full migration pass. If the user stops earlier (e.g. after configuration only), hand off at that milestone instead.
-
-### What to say
-
-Be direct and brief:
-
-1. A short summary of what changed.
-2. A checklist the user can run.
-3. One clear ask for feedback.
-
-Skip empty phrases ("let me know if you need anything"). Thanking them once for checking is fine.
-
-### What to ask the user to verify
-
-- **Local build** — the project's real build entrypoint, not a partial command. If it fails, paste the full error output (command, exit code, last ~30 lines of stderr).
-- **Checks you already ran** — state them in one line so the user doesn't duplicate work.
-- **CloudCannon (human)** — confirm in the hosted environment:
-  - Inline text regions can be edited in the preview on representative pages
-  - Image regions open the image picker
-  - Array regions show add/remove/reorder controls where arrays were wired
-  - Cross-file editables (`@file`, shared partials) update the intended source file
-  - Saved changes land in the expected files in git
-
-### What to ask the user to send back
-
-Concrete signals: the exact command run, CloudCannon build log snippets if the remote build failed, the page URL and what they clicked if the editor misbehaved, or a short description of what differs from expected.
-
-### Iteration
-
-End with one line that invites the next pass — when they've run those checks, reply with any failures or odd behavior.
 
 ## Naming conventions
 

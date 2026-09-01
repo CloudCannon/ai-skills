@@ -1,6 +1,6 @@
 # Multilingual Troubleshooting
 
-Symptom-driven diagnosis for a Rosey/RCC site. Preventative one-line rules live in [`SKILL.md` § Gotchas](SKILL.md#gotchas); authoring rules live in [`tagging.md`](tagging.md).
+Symptom-driven diagnosis for a Rosey/RCC site. Preventative one-line rules live in [gotchas.md](gotchas.md); authoring rules live in [`tagging.md`](tagging.md).
 
 **Start here: almost every multilingual bug renders correctly in the default language.** Rosey doesn't inject translations on the default-language pages, so a polluted key, a stale namespace, or a double-prefixed URL is invisible at `/`. Reproduce on `/{locale}/` — and, on an RCC site, in the Visual Editor — before concluding anything works.
 
@@ -149,7 +149,7 @@ See the SSG-specific file for a working picker.
 
 ## A split-by-directory file is skipped on every later translation run
 
-**Cause:** you edited the source-language post _after_ its locale copy was translated. [`translate-multilingual`](../translate-multilingual/SKILL.md) Part 2 classifies a file as either untranslated or already-translated — the classification is **binary**, with no stale state and no amber badge.
+**Cause:** you edited the source-language post _after_ its locale copy was translated. [`translate-site`](../translate-site/SKILL.md) Part 2 classifies a file as either untranslated or already-translated — the classification is **binary**, with no stale state and no amber badge.
 
 **Why it's silent:** the locale copy still differs from source, so it stays classified "already translated" and every later run skips it. The Part 1 locale JSON _does_ have staleness detection; Part 2 does not.
 

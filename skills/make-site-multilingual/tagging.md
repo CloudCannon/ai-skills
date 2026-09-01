@@ -1,6 +1,6 @@
 # Tagging Templates with `data-rosey`
 
-Phase 3 of [`SKILL.md`](SKILL.md), in full. Add Rosey attributes to the built HTML, working from the outermost layout inward.
+Phase 3 of [`setup.md`](setup.md), in full. Add Rosey attributes to the built HTML, working from the outermost layout inward.
 
 **MUST verify on a translated page.** Almost every mistake in this file renders correctly in the default language — Rosey doesn't inject there. Check `/{locale}/`, not `/`.
 
@@ -106,7 +106,7 @@ Nav and footer sit **outside** `<main>` and so have no `data-rosey-root` ancesto
 
 Strip leading/trailing slashes and fall back to `"index"` for the home page. Provide an explicit override for routes where the derivation can't be right (taxonomy terms, split-by-directory locale pages — see Phase 8 step 5).
 
-**Read the SSG-specific file** (`astro.md`, `eleventy.md`, `hugo.md`) for the exact expression.
+**Read the SSG-specific file** (`astro/overview.md`, `eleventy/overview.md`, `hugo/overview.md`) for the exact expression.
 
 ## 3f. Component integration: auto-derive `data-rosey` (optional)
 
@@ -127,7 +127,7 @@ For reusable building-block components that already output `data-prop="title"` f
 
 **Why:** the connector saves with `slug: "<key>.value"`, so a dotted key resolves to a nested path that doesn't exist and **the edit is silently dropped**. Rosey's own build-time substitution matches the whole key string, so the translated site renders perfectly and only Visual Editor saves misfire — there is no error and no visible symptom.
 
-See `astro.md` for a concrete implementation.
+See `astro/overview.md` for a concrete implementation.
 
 ## 3g. Namespacing arrays and page-builder blocks
 
@@ -139,7 +139,7 @@ This is the single most important authoring rule for arrays, and getting it wron
 
 `data-rosey` and `data-rosey-ns={item._uuid}` are **build-time markup** — they only get their correct value when the component that emits them actually re-renders. When you put the namespace on the **element that does the looping** (the `.map()` / `{% for %}` wrapper in the parent) and an editor **adds or reorders** an array item in CloudCannon, CloudCannon often creates the new item by **cloning a sibling's DOM node** rather than re-rendering. The cloned item inherits a **stale, duplicated** `data-rosey-ns`, so its key collides with the sibling it was cloned from — silently breaking translation of the new item and stale detection, until the editor is reloaded.
 
-The fix: make **each array item its own registered component**, and put the rosey namespace/keys **on that component's own root**, so CloudCannon renders each item directly and every item carries its own live `_uuid`. Put `data-component="<registered-name>"` on the `data-editable="array-item"` element — that single attribute is the whole fix for a uniform sub-array (no `data-component-key`, `data-id-key`, or `<template>` needed). See `astro.md` for the full before/after example.
+The fix: make **each array item its own registered component**, and put the rosey namespace/keys **on that component's own root**, so CloudCannon renders each item directly and every item carries its own live `_uuid`. Put `data-component="<registered-name>"` on the `data-editable="array-item"` element — that single attribute is the whole fix for a uniform sub-array (no `data-component-key`, `data-id-key`, or `<template>` needed). See `astro/overview.md` for the full before/after example.
 
 > Rule of thumb: **if a loop renders items, the `data-rosey`/`data-rosey-ns` attributes belong inside the item's component, never on the parent's loop wrapper.**
 

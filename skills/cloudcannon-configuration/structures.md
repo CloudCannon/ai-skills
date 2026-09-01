@@ -170,7 +170,7 @@ Structures used by multiple block types — like `actions` (button arrays), `ite
 A structure's `preview` applies wherever the structure is used — a shared `_nav_items` can't have different icons per consumer. Pick an icon meaningful to the structure's own identity (`link` for `_nav_items`, `help` for `_faq_items`), not to any one consumer's context.
 
 ❌ Forking `_nav_items` into `_nav_items_primary` / `_nav_items_footer` just to vary the icon — clutters `_structures` with near-duplicates.
-❌ Adding `[*]` overrides on the array per-consumer to "override" the preview — silently ignored when `structures:` is defined (see [configuration-gotchas.md § Array item previews](astro/configuration-gotchas.md#array-item-previews--vs-structure-value)).
+❌ Adding `[*]` overrides on the array per-consumer to "override" the preview — silently ignored when `structures:` is defined (see [configuration-gotchas.md § Array item previews](astro/configuration-gotchas.md#array-item-previews---vs-structure-value)).
 ✓ One structure, one preview. If two consumers truly need different previews, they need different structures.
 
 ### Duplicated select values across structure-value files
@@ -225,7 +225,7 @@ The same applies to nested arrays inside shared sub-structures (e.g. if `prices`
 
 ## Previews
 
-Previews go on **every** structure value — co-located `*.cloudcannon.structure-value.yml` files, inline `_structures` entries in the main config, AND inline structures defined inside `file_config._inputs` for data files. If an array has `structures:`, its item previews live here, **not** on the array's `[*]` path — see [configuration-gotchas.md § Array item previews](astro/configuration-gotchas.md#array-item-previews--vs-structure-value).
+Previews go on **every** structure value — co-located `*.cloudcannon.structure-value.yml` files, inline `_structures` entries in the main config, AND inline structures defined inside `file_config._inputs` for data files. If an array has `structures:`, its item previews live here, **not** on the array's `[*]` path — see [configuration-gotchas.md § Array item previews](astro/configuration-gotchas.md#array-item-previews---vs-structure-value).
 
 Every structure value should include both `picker_preview` and `preview`:
 

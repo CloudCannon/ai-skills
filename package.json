@@ -3,9 +3,12 @@
   "private": true,
   "scripts": {
     "format": "prettier --write \"**/*.md\"",
-    "format:check": "prettier --check \"**/*.md\""
+    "format:check": "prettier --check \"**/*.md\"",
+    "check:links": "node scripts/check-links.mjs",
+    "check": "npm run format:check && npm run check:links"
   },
   "devDependencies": {
+    "github-slugger": "^2.0.0",
     "prettier": "^3.3.3"
   }
 }

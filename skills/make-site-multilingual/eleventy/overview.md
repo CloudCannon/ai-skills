@@ -1,6 +1,6 @@
 # Eleventy-Specific Patterns
 
-Framework-specific implementation details for making an Eleventy (11ty) site multilingual with Rosey/RCC/CloudCannon. Read alongside the main [`SKILL.md`](SKILL.md) workflow and [`tagging.md`](tagging.md).
+Framework-specific implementation details for making an Eleventy (11ty) site multilingual with Rosey/RCC/CloudCannon. Read alongside [`setup.md`](../setup.md) and [`tagging.md`](../tagging.md).
 
 **Reference implementation:** [`CloudCannon/eleventy-multilingual-starter`](https://github.com/CloudCannon/eleventy-multilingual-starter) — all-languages-prefixed URLs, split-by-directory blog, per-locale taxonomy, translated head.
 
@@ -8,7 +8,7 @@ Framework-specific implementation details for making an Eleventy (11ty) site mul
 
 **MUST derive `data-rosey-root` from `page.filePathStem`, not `page.url`.** `filePathStem` comes from the input file, so it is identical across every pagination page of a template ([`Template.js:841`](https://github.com/11ty/eleventy) copies the parent's onto each paginated entry).
 
-**Why:** `page.url` is the computed permalink. `page.url | replace: '/', ''` turns `/blog/1/` into `blog1` — which also collides with a real `/blog1/` page — and the split/join alternative gives `blog-1`. Either way, page 2 of a listing gets its own root and a duplicate, untranslated copy of every key on it. See [tagging.md § 3e](tagging.md#3e-derive-the-root-from-the-templates-source-identity).
+**Why:** `page.url` is the computed permalink. `page.url | replace: '/', ''` turns `/blog/1/` into `blog1` — which also collides with a real `/blog1/` page — and the split/join alternative gives `blog-1`. Either way, page 2 of a listing gets its own root and a duplicate, untranslated copy of every key on it. See [tagging.md § 3e](../tagging.md#3e-derive-the-root-from-the-templates-source-identity).
 
 Compute it once in a global data file rather than in each template:
 
@@ -44,7 +44,7 @@ Two things this buys beyond pagination safety:
 
 ## Content-Block Namespacing — keep rosey attributes inside the block, not the loop
 
-> This implements the core rule from [§3g](tagging.md#3g-namespacing-arrays-and-page-builder-blocks) of the main skill. The `data-rosey-ns` / `data-rosey` attributes belong on the block partial (the thing rendered per item), not left dangling on the parent's `{% for %}` wrapper, so that CloudCannon's clone-on-add/reorder can't produce a stale, duplicated namespace.
+> This implements the core rule from [§3g](../tagging.md#3g-namespacing-arrays-and-page-builder-blocks) of the main skill. The `data-rosey-ns` / `data-rosey` attributes belong on the block partial (the thing rendered per item), not left dangling on the parent's `{% for %}` wrapper, so that CloudCannon's clone-on-add/reorder can't produce a stale, duplicated namespace.
 
 For sites using `content_blocks`, the shared page template loops the blocks; use each block's `_uuid` (from CloudCannon's `instance_value: UUID`) as the namespace segment:
 
@@ -56,7 +56,7 @@ For sites using `content_blocks`, the shared page template loops the blocks; use
 {% endfor %}
 ```
 
-This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every structure value — see [§3g](tagging.md#stable-namespace-values-uuids-cloudcannon-sites-rcc-layer). One change covers all blocks across all pages. The `data-rosey` leaf keys themselves live inside each included block partial.
+This requires a `_uuid` input in `cloudcannon.config.yml` and `_uuid:` in every structure value — see [§3g](../tagging.md#stable-namespace-values-uuids-cloudcannon-sites-rcc-layer). One change covers all blocks across all pages. The `data-rosey` leaf keys themselves live inside each included block partial.
 
 **Fallback (non-CloudCannon):** block name + index — fragile, reordering shifts keys:
 
@@ -165,7 +165,7 @@ When implementing split-by-directory (Phase 8) in Eleventy:
   permalink: (data) => `${localePrefix(code)}/blog/${data.page.fileSlug}/`;
   ```
 
-  **Why:** a translated title gives `/fr/blog/edition-en-markdown/` while the picker, `hreflang`, and tag links all point at `/fr/blog/markdown-editing/`. It also breaks `translate-multilingual`'s pairing of source to locale copy, which matches on filename. The stock CloudCannon Eleventy starter uses `title | slugify` — change it.
+  **Why:** a translated title gives `/fr/blog/edition-en-markdown/` while the picker, `hreflang`, and tag links all point at `/fr/blog/markdown-editing/`. It also breaks `translate-site`'s pairing of source to locale copy, which matches on filename. The stock CloudCannon Eleventy starter uses `title | slugify` — change it.
 
 - `localePrefix` MUST return `""` for the default locale. Eleventy builds the default language at the root and `rosey build` relocates it; emitting `/en` here gives `/en/en/` (Phase 1 step 5).
 - Suppress `data-rosey` on frontmatter-driven fields by conditionally omitting the attribute when `locale` is set — including in the `<head>` partial, via a `rosey_seo: false` in the directory data.
@@ -195,7 +195,7 @@ The picker's client-side script guards on the editor flag — **(RCC layer)** hi
 ### Eleventy
 
 - **Root derivation uses `page.filePathStem`, not `page.url`.** `page.url` is the computed permalink, so paginated pages get different roots and duplicate every key. Keep an override variable for taxonomy routes.
-- **The stock CloudCannon Eleventy starter ships `source: src`.** So effectively every Eleventy site built from it hits the locale-file resolution collision — CloudCannon can't reach root-level `rosey/locales/`. See [troubleshooting.md](troubleshooting.md#cloudcannon-cant-reach-roseylocales).
+- **The stock CloudCannon Eleventy starter ships `source: src`.** So effectively every Eleventy site built from it hits the locale-file resolution collision — CloudCannon can't reach root-level `rosey/locales/`. See [troubleshooting.md](../troubleshooting.md#cloudcannon-cant-reach-roseylocales).
 - **The stock starter also derives post permalinks from `title | slugify`.** That forks the URL path per locale. Switch to `page.fileSlug` before creating locale directories.
 - **`collections[tag]` is project-global.** Eleventy's automatic tag collections have no directory scoping, so they mix locales silently. Precompute per-`(tag, locale)` collections instead.
 - **`pagination.href.next` crosses locale boundaries** when paginating a precomputed multi-locale collection at `size: 1`. Carry prev/next on your own collection entries.
@@ -205,4 +205,4 @@ The picker's client-side script guards on the editor flag — **(RCC layer)** hi
 ### Bookshop (skip if site does not use Bookshop)
 
 - **`page.eleventy.liquid` is the ideal block-namespacing point.** Use `{{ block._uuid }}` (from `instance_value: UUID`) for stable keys; fall back to `{% assign block_ns = block._bookshop_name | split: "/" | last | append: "-" | append: forloop.index0 %}` (fragile). One change covers all blocks.
-- **Button `data-rosey` captures SVG icon markup.** On an `<a>`/`<button>` containing both text and a Bookshop icon, Rosey captures the full `innerHTML` including the rendered SVG and live-edit comments — polluting the source and, on translated pages, injecting the icon twice. Wrap just the text in a `<span data-rosey="button_text">` and leave the icon outside. On an already-translated site, moving the tag also needs a delete-and-reseed of the affected locale keys — see [troubleshooting.md](troubleshooting.md#moving-a-tag-on-an-already-translated-site-needs-a-delete-and-reseed).
+- **Button `data-rosey` captures SVG icon markup.** On an `<a>`/`<button>` containing both text and a Bookshop icon, Rosey captures the full `innerHTML` including the rendered SVG and live-edit comments — polluting the source and, on translated pages, injecting the icon twice. Wrap just the text in a `<span data-rosey="button_text">` and leave the icon outside. On an already-translated site, moving the tag also needs a delete-and-reseed of the affected locale keys — see [troubleshooting.md](../troubleshooting.md#moving-a-tag-on-an-already-translated-site-needs-a-delete-and-reseed).

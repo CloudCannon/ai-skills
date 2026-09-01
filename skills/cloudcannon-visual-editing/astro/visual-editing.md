@@ -146,7 +146,7 @@ Work through every item after implementing editable regions. Each item links to 
 - [ ] **`_inputs` presence audit:** grep `data-prop=` in every template; grep `_inputs:` in the collection config; diff the keys. Every `data-editable` region must have a matching `_inputs` entry — missing entry → visual-editor errors on entries whose frontmatter has the field populated.
 - [ ] **Schema-file seed audit:** every field the template wires must appear in `.cloudcannon/schemas/<collection>.md` default frontmatter with a sensible placeholder. Otherwise "Add new" creates pages missing half their editable regions.
 - [ ] **Markdown body content**: Pages rendering markdown body (via `<Content />`, `entry.render()`, or `<slot />` in layouts) have `data-editable="text" data-type="block" data-prop="@content"` on the wrapper element
-      → [Content body editing](visual-editing-reference.md#content-body-editing)
+      → [Text editing](visual-editing-reference.md#text-editing)
 - [ ] **Slot content hosts**: Editable slot content uses a concrete DOM host (`<editable-text>`, `<span>`) not `<Fragment>`
       → [Text editing](visual-editing-reference.md#text-editing)
 - [ ] **Source editables**: Hardcoded text in page templates has `data-editable="source"` with `data-path` and `data-key`.
@@ -189,7 +189,7 @@ Work through every item after implementing editable regions. Each item links to 
 Before declaring the migration complete, run these three verifications. This is the net that catches shared sections that slipped through the section census and completeness checklist.
 
 - [ ] **Census walk-through.** Re-open `.cloudcannon/migration/visual-editing.md` and walk every census row. Each row's treatment is implemented in the repo — not just proposed. Rows with `sidebar-only` justification are written out with a technical reason.
-- [ ] **Shared-UI table walk-through.** Open [../../migrating-to-cloudcannon/astro/cc-friendly-conventions.md § Shared-UI treatment table](../../migrating-to-cloudcannon/astro/cc-friendly-conventions.md#shared-ui-treatment-table) and verify every row against the repo: the named data file exists in `src/data/`, is wired in `data_config` with a `file_config` entry, the component reads from the data file, and editables are in place. If a row doesn't apply (the site has no footer, no CTA, etc.), note it explicitly in `.cloudcannon/migration/visual-editing.md`.
+- [ ] **Shared-UI table walk-through.** Open [../../migrate-to-cloudcannon/astro/cc-friendly-conventions.md § Shared-UI treatment table](../../migrate-to-cloudcannon/astro/cc-friendly-conventions.md#shared-ui-treatment-table) and verify every row against the repo: the named data file exists in `src/data/`, is wired in `data_config` with a `file_config` entry, the component reads from the data file, and editables are in place. If a row doesn't apply (the site has no footer, no CTA, etc.), note it explicitly in `.cloudcannon/migration/visual-editing.md`.
 - [ ] **Build grep.** Run `grep -rE "data-editable|data-prop" dist/` and confirm matches for every shared section name you expect: footer, cta, share, author, any other shared partials. If a name is missing, the section wasn't wired up.
 
 Use grep counts, not line counts (`grep -oE`, not `grep -c`), when verifying — compressed HTML puts everything on one line, so `grep -c` always returns 1.

@@ -55,12 +55,12 @@ The decision rule: if skipping the change means the config is wrong or fragile, 
 The CloudCannon CLI produces a structural baseline. The following customizations are almost always needed, informed by the Phase 1 audit:
 
 - **`_inputs`** -- configure how fields appear in the editor (dropdowns, date pickers, image uploaders, comments, hidden fields). Map these from the Zod schemas discovered in the audit. When a frontmatter field contains markdown (e.g. a hero description with `**bold**` text), use `type: markdown`, not `type: textarea`. The same goes for fields that contain html elements (e.g. a hero description with `<strong>bold</strong>` text) - they should use `type: html`, instead of `type: textarea`. Use scoped input keys (e.g. `hero.description`) when the general input should stay as `textarea` but a specific context needs `markdown`. Fields whose value is one of a fixed set (`variant`, `target`, `size`, `align`, `theme`, `columns`, etc.) must be `type: select` — never `type: text`. See [configuration-gotchas.md § Configure variant/enum-like fields as select inputs](configuration-gotchas.md#configure-variant--enum-like-fields-as-select-inputs).
-- **`_structures`** -- MANDATORY for every array and object input on the site. See [../structures.md § Mandatory rules](../structures.md#mandatory-rules-read-first) for the full requirement (structure definition + explicit `_inputs` linkage with full path).
+- **`_structures`** -- MANDATORY for every array and object input on the site. See [../structures.md § Mandatory rules](../structures.md#the-four-rules-read-first) for the full requirement (structure definition + explicit `_inputs` linkage with full path).
 - **`icon`** -- every collection should have an `icon` key so it gets a meaningful icon in the CloudCannon sidebar instead of a generic default. Pick icons that reflect the collection's purpose (e.g. `wysiwyg` for pages, `post_add` for blog posts, `home` for homepages, `settings` for data/config). CloudCannon's icon set is a **fixed curated subset** of Material Symbols — invalid names silently fall back to the default. When unsure, see [../SKILL.md § Do this before writing any configuration](../SKILL.md#do-this-before-writing-any-configuration) for schema details to check for the exact name. Common gotcha: `place` is not in the enum — use `location_on`.
 - **All schema fields mapped** -- cross-reference every field in the Zod schema against the `_inputs` config. Every user-facing field needs an appropriate input type (`textarea` for multi-line strings like excerpts/descriptions, `datetime` for dates, `image` for image paths, etc.). Missing fields fall back to CC's type inference, which is often wrong. When unsure whether a field is user-facing or developer-only, check whether its value is rendered as visible text on the built page. If it appears on the page, it should be editable with an appropriate input type. Only fields undergoing heavy programmatic transformation (e.g. used purely as a build-time lookup key) should be hidden.
 - **`collection_groups`** -- organize collections into sidebar groups for a clean editing experience.
 - **`_editables`** -- configure rich text editor toolbars per collection or globally.
-- **Editor styles** -- when the audit flagged styled HTML in content fields (inline spans with CSS classes for accent colors, emphasis, etc.), create `.cloudcannon/styles/editor.css` with semantic class definitions and reference it from `type: html` inputs via `options.styles`. This lets editors apply custom styling (e.g. brand-colored highlight text) through the rich text toolbar without Tailwind utility classes in the content. See [content.md § Handling styled HTML in frontmatter](../../migrating-to-cloudcannon/astro/content.md#handling-styled-html-in-frontmatter) and the [Jetstream template](https://github.com/CloudCannon/jetstream-astro-template) for the reference pattern.
+- **Editor styles** -- when the audit flagged styled HTML in content fields (inline spans with CSS classes for accent colors, emphasis, etc.), create `.cloudcannon/styles/editor.css` with semantic class definitions and reference it from `type: html` inputs via `options.styles`. This lets editors apply custom styling (e.g. brand-colored highlight text) through the rich text toolbar without Tailwind utility classes in the content. See [content.md § Handling styled HTML in frontmatter](../../migrate-to-cloudcannon/astro/content.md#handling-styled-html-in-frontmatter) and the [Jetstream template](https://github.com/CloudCannon/jetstream-astro-template) for the reference pattern.
 - **`markdown`** -- if content files contain Markdown-syntax tables (`| col | col |`), set `markdown.options.table: true`. See [configuration-gotchas.md § Markdown tables](configuration-gotchas.md#set-markdownoptionstable-when-content-has-markdown-tables).
 - **`_snippets`** -- configure snippets for non-standard markdown amongst markdown content. In Astro this is often MDX components used in rich text content. Built-in templates like `mdx_component` resolve automatically — no `_snippets_imports` needed. See the `cloudcannon-snippets` skill.
 - **`_select_data`** -- define shared dropdown options for fields used across collections. When values need friendly display names (e.g. icon identifiers), use objects with `name`/`id` instead of flat strings, paired with `value_key: id` on the input:
@@ -478,7 +478,7 @@ Note that `editor: content` on add options only controls the editor for _new_ fi
 
 ## Page building patterns
 
-See [page-building.md](../../migrating-to-cloudcannon/astro/page-building.md) for the full guide on creating content-backed pages and array-based page builders, including the pages collection setup, catch-all route, BlockRenderer, and CC collection config.
+See [page-building.md](../../migrate-to-cloudcannon/astro/page-building.md) for the full guide on creating content-backed pages and array-based page builders, including the pages collection setup, catch-all route, BlockRenderer, and CC collection config.
 
 For the structures reference (inline vs split, field completeness, previews, deriving from components), see [../structures.md](../structures.md).
 
@@ -522,8 +522,8 @@ Work through these before moving to the next phase. One check per line.
 
 ### Blocking gates
 
-- [ ] **MDX gate:** if any `.mdx` file uses JSX components (`rg '<[A-Z]' -g '*.mdx' src/content`), the [MDX setup pipeline](../../cloudcannon-snippets/astro.md#mdx-setup-pipeline-must-complete-all-four) is fully complete. `_snippets` alone is not enough — auto-import and `import` removal are both required. #1 source of migration regressions.
-- [ ] [Structures — mandatory rules](../structures.md#mandatory-rules-read-first) all pass (field completeness + array/object structure linkage + preview blocks + nested object preview icons).
+- [ ] **MDX gate:** if any `.mdx` file uses JSX components (`rg '<[A-Z]' -g '*.mdx' src/content`), the [MDX setup pipeline](../../cloudcannon-snippets/astro/overview.md#mdx-setup-pipeline-must-complete-all-four) is fully complete. `_snippets` alone is not enough — auto-import and `import` removal are both required. #1 source of migration regressions.
+- [ ] [Structures — mandatory rules](../structures.md#the-four-rules-read-first) all pass (field completeness + array/object structure linkage + preview blocks + nested object preview icons).
 
 ### Files
 
@@ -561,14 +561,14 @@ Work through these before moving to the next phase. One check per line.
 
 ### Snippets & editors
 
-- [ ] Every MDX component has a `_snippets` entry OR the file uses `_enabled_editors: [source, data]` with rationale in migration notes — see [cloudcannon-snippets/astro.md § Every MDX component must be accounted for](../../cloudcannon-snippets/astro.md#every-mdx-component-must-be-accounted-for)
-- [ ] MDX files with `import` statements set up `astro-auto-import` (or equivalent) so imports are injected at build time and removed from source files — see [astro.md § Auto-import](../../cloudcannon-snippets/astro.md#auto-import-keeping-import-statements-out-of-content)
+- [ ] Every MDX component has a `_snippets` entry OR the file uses `_enabled_editors: [source, data]` with rationale in migration notes — see [cloudcannon-snippets/astro/overview.md § Every MDX component must be accounted for](../../cloudcannon-snippets/astro/overview.md#every-mdx-component-must-be-accounted-for)
+- [ ] MDX files with `import` statements set up `astro-auto-import` (or equivalent) so imports are injected at build time and removed from source files — see [astro/overview.md § Auto-import](../../cloudcannon-snippets/astro/overview.md#auto-import-keeping-import-statements-out-of-content)
 - [ ] `_enabled_editors` order has the preferred default editor first (`visual` for page collections; `visual` → `content` for blog posts)
 - [ ] Collections of `.md` files that don't build to a page have `_enabled_editors: [data]`
 
 ### Content specifics
 
-- [ ] `<br />` tags in plain text frontmatter that simulate lists are converted to HTML lists in `type: html` fields, or split into arrays. `<br />` in rich text fields is fine. See [content.md § Handling styled HTML in frontmatter](../../migrating-to-cloudcannon/astro/content.md#handling-styled-html-in-frontmatter)
+- [ ] `<br />` tags in plain text frontmatter that simulate lists are converted to HTML lists in `type: html` fields, or split into arrays. `<br />` in rich text fields is fine. See [content.md § Handling styled HTML in frontmatter](../../migrate-to-cloudcannon/astro/content.md#handling-styled-html-in-frontmatter)
 - [ ] `markdown.options.table` is `true` if any content files contain Markdown-syntax tables
 - [ ] For every boolean/switch/enum field in `_inputs`, the template has a conditional render. No dead fields — an editor-visible switch that toggles nothing is a broken UX signal.
 - [ ] For every `data-editable="text"` region with a template `|| "default"` fallback, the collection schema (or structure-value default) sets the same text as a real value, and existing content files are backfilled. Template fallbacks alone are invisible to the editor.
@@ -585,6 +585,6 @@ Work through these before moving to the next phase. One check per line.
 - [ ] Collections where editors should not create new files use `disable_add: true`
 - [ ] Schemas for creatable page types have `new_preview_url` OR `editor: content` on add options
 - [ ] Collections with a `draft` field use `editor: content` on add options (drafts aren't built)
-- [ ] Sites with 3+ reusable block components have a page builder schema — see [page-building.md](../../migrating-to-cloudcannon/astro/page-building.md)
+- [ ] Sites with 3+ reusable block components have a page builder schema — see [page-building.md](../../migrate-to-cloudcannon/astro/page-building.md)
 
 For common pitfalls and patterns, see [configuration-gotchas.md](configuration-gotchas.md).
