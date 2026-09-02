@@ -25,6 +25,7 @@ description: >-
 
 - **Deciding what belongs in `cloudcannon.config.yml`** — that is [`cloudcannon-configuration`](../cloudcannon-configuration/SKILL.md). This skill runs `configure` and `validate`; that skill owns what their output should say.
 - **Running or verifying the local dev server** — `cloudcannon dev` is covered end to end by [`cloudcannon-dev-server`](../cloudcannon-dev-server/SKILL.md), including building first, freshness, and the `/__api` surface.
+- **Calling the CloudCannon API from code** — that is [`cloudcannon-sdk`](../cloudcannon-sdk/SKILL.md). It also owns the surface no command reaches: DAMs, backups, syncs, site scans, screenshots, provider connections, `site.copy`, `site.delete`.
 - **Authoring editable regions or snippets** — [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md) and [`cloudcannon-snippets`](../cloudcannon-snippets/SKILL.md).
 
 ## The rule that costs the most

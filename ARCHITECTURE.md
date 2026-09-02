@@ -23,13 +23,14 @@ Long, multi-phase, run once against a site. They keep state in `.cloudcannon/mig
 
 One CloudCannon feature each. Reference-shaped — delegated to by a journey, or entered directly on a site that is already migrated.
 
-| Skill                        | Purpose                                                   | Entry point                                            |
-| ---------------------------- | --------------------------------------------------------- | ------------------------------------------------------ |
-| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures | [SKILL.md](skills/cloudcannon-configuration/SKILL.md)  |
-| `cloudcannon-snippets`       | MDX components and inline HTML in the Content Editor      | [SKILL.md](skills/cloudcannon-snippets/SKILL.md)       |
-| `cloudcannon-visual-editing` | Editable regions for the Visual Editor                    | [SKILL.md](skills/cloudcannon-visual-editing/SKILL.md) |
-| `cloudcannon-dev-server`     | Build, serve and verify a site under `cloudcannon dev`    | [SKILL.md](skills/cloudcannon-dev-server/SKILL.md)     |
-| `cloudcannon-cli`            | The CloudCannon CLI, and operations on hosted sites       | [SKILL.md](skills/cloudcannon-cli/SKILL.md)            |
+| Skill                        | Purpose                                                             | Entry point                                            |
+| ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures           | [SKILL.md](skills/cloudcannon-configuration/SKILL.md)  |
+| `cloudcannon-snippets`       | MDX components and inline HTML in the Content Editor                | [SKILL.md](skills/cloudcannon-snippets/SKILL.md)       |
+| `cloudcannon-visual-editing` | Editable regions for the Visual Editor                              | [SKILL.md](skills/cloudcannon-visual-editing/SKILL.md) |
+| `cloudcannon-dev-server`     | Build, serve and verify a site under `cloudcannon dev`              | [SKILL.md](skills/cloudcannon-dev-server/SKILL.md)     |
+| `cloudcannon-cli`            | The CloudCannon CLI, and operations on hosted sites                 | [SKILL.md](skills/cloudcannon-cli/SKILL.md)            |
+| `cloudcannon-sdk`            | The CloudCannon API from code, and the surface the CLI cannot reach | [SKILL.md](skills/cloudcannon-sdk/SKILL.md)            |
 
 ### Operations
 
@@ -123,6 +124,14 @@ SKILL.md                                ENTRY POINT — local/remote split, the 
 commands.md                             The command surface, and querying documentation.json
 authentication.md                       Credential methods, precedence, storage, CI
 editing-sessions.md                     `sites files` — staging, committing, discarding
+troubleshooting.md                      Symptom → cause → fix
+
+── cloudcannon-sdk (capability) ──────────────────────────────
+SKILL.md                                ENTRY POINT — routing, the write gate, requirements
+client.md                               Constructing the client; why it reads no credentials itself
+resources.md                            Sub-client hierarchy, UUID addressing, pagination, return types
+api-surface.md                          Reading the shipped method list; the raw client.fetch escape hatch
+editing-sessions.md                     Writing files to a hosted site through the SDK
 troubleshooting.md                      Symptom → cause → fix
 
 ── translate-site (operation) ────────────────────────────────

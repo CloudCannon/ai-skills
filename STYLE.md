@@ -37,11 +37,11 @@ Canonical example: `cloudcannon-configuration/collection-urls.md` owns placehold
 
 **MUST:** pick the tier before creating a skill. It fixes the name, the entry shape, and whether the skill keeps state.
 
-| Tier           | What it is                                                        | Named                   | Keeps state                     | Today                                                                                                                          |
-| -------------- | ----------------------------------------------------------------- | ----------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Journey**    | Long, multi-phase, run once against a site                        | Verb-first              | Yes — `.cloudcannon/migration/` | `migrate-to-cloudcannon`, `make-site-multilingual`                                                                             |
-| **Capability** | One CloudCannon feature; delegated to, or entered directly        | `cloudcannon-<feature>` | No                              | `cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`, `cloudcannon-dev-server`, `cloudcannon-cli` |
-| **Operation**  | Short, symptom- or task-driven, against a site that already works | Verb-first              | No                              | `translate-site`                                                                                                               |
+| Tier           | What it is                                                        | Named                   | Keeps state                     | Today                                                                                                                                             |
+| -------------- | ----------------------------------------------------------------- | ----------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Journey**    | Long, multi-phase, run once against a site                        | Verb-first              | Yes — `.cloudcannon/migration/` | `migrate-to-cloudcannon`, `make-site-multilingual`                                                                                                |
+| **Capability** | One CloudCannon feature; delegated to, or entered directly        | `cloudcannon-<feature>` | No                              | `cloudcannon-configuration`, `cloudcannon-snippets`, `cloudcannon-visual-editing`, `cloudcannon-dev-server`, `cloudcannon-cli`, `cloudcannon-sdk` |
+| **Operation**  | Short, symptom- or task-driven, against a site that already works | Verb-first              | No                              | `translate-site`                                                                                                                                  |
 
 **Why:** the tiers have genuinely different shapes — a journey needs phase gates and handoff notes, an operation needs a symptom table and an exit. Choosing the tier first stops an operation from growing migration scaffolding it will never use.
 
