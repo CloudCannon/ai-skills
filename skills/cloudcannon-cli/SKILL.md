@@ -58,7 +58,7 @@ npx @cloudcannon/cli --help
 npx @cloudcannon/cli sites files commit --help
 
 # Local: generate and check a configuration
-npx @cloudcannon/cli configure generate --auto --initial-build-settings
+npx @cloudcannon/cli configure generate --auto --initial-site-settings
 npx @cloudcannon/cli validate
 
 # Remote: authenticate, then read

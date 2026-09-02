@@ -14,7 +14,7 @@ Everything else about the CLI — authenticating, operating on hosted sites, fil
 For fully automated setup, run from the project root:
 
 ```bash
-npx @cloudcannon/cli configure generate --auto --initial-build-settings
+npx @cloudcannon/cli configure generate --auto --initial-site-settings
 ```
 
 This generates:
@@ -80,7 +80,7 @@ Returns build command suggestions with attributions explaining why each was sugg
 The `generate` subcommand will create the files in place:
 
 ```bash
-npx @cloudcannon/cli configure generate --auto --initial-build-settings --ssg astro
+npx @cloudcannon/cli configure generate --auto --initial-site-settings --ssg astro
 ```
 
 Adding the `--dry-run` flag prints the file output instead:
@@ -168,7 +168,7 @@ When working outside an IDE (e.g. as an AI agent), download the schema and query
    mkdir -p .cloudcannon/migration && curl -sL "https://github.com/cloudcannon/configuration-types/releases/latest/download/cloudcannon-config.latest.schema.json" -o .cloudcannon/migration/cloudcannon-config.latest.schema.json
 2. Run `npx @cloudcannon/cli configure detect-ssg` to identify the SSG
 3. Parse the JSON output to get the SSG key
-4. Run `npx @cloudcannon/cli configure generate --auto --initial-build-settings --ssg <key>`
+4. Run `npx @cloudcannon/cli configure generate --auto --initial-site-settings --ssg <key>`
 5. Read the generated cloudcannon.config.yml
 6. Before adding each customisation key, query the schema: jq '.definitions["<section>"].properties | keys' .cloudcannon/migration/cloudcannon-config.latest.schema.json
 7. Write the updated config back to disk

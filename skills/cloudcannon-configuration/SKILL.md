@@ -47,7 +47,7 @@ This skill covers creating and customizing `cloudcannon.config.yml` (tells Cloud
 Generate a baseline configuration with the CloudCannon CLI, if `cloudcannon.config.yml` does not already exist, run:
 
 ```bash
-npx @cloudcannon/cli configure generate --auto --initial-build-settings
+npx @cloudcannon/cli configure generate --auto --initial-site-settings
 ```
 
 This detects your SSG, collections, and build settings, and writes `cloudcannon.config.yml` and `.cloudcannon/initial-site-settings.json`. The output likely needs customization — it does not infer input types, structures, select data, or editor toolbars. See [cloudcannon-cli-guide.md](cloudcannon-cli-guide.md) for step-by-step control and customization targets.

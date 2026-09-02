@@ -9,7 +9,7 @@ Guidance for creating and configuring `cloudcannon.config.yml` and `.cloudcannon
 Use the CloudCannon CLI to generate a baseline configuration. Run subcommands individually to cross-reference against the Phase 1 audit. See [../cloudcannon-cli-guide.md](../cloudcannon-cli-guide.md) for the full CLI reference and all available commands.
 
 ```bash
-npx @cloudcannon/cli configure generate --auto --initial-build-settings --ssg astro
+npx @cloudcannon/cli configure generate --auto --initial-site-settings --ssg astro
 ```
 
 **When the CloudCannon CLI is unavailable** (sandbox network restrictions, version incompatibility, etc.), write the config manually using the audit findings. Follow the same review and customization checklists below — the CloudCannon CLI is a time-saver, not a prerequisite.
