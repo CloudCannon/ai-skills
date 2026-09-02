@@ -155,3 +155,18 @@ SKILL.md                                Single file — design dialogue, then ha
 **New skill** — pick its tier first (journey, capability, or operation); the tier fixes the name and the entry shape. Start from a skeleton in [templates/](templates/), then add it to the tier tables above and to the README.
 
 **Every change** — `npm run check` must pass. It verifies formatting, that every relative link and `#anchor` resolves, and that each `SKILL.md`'s frontmatter `name` matches its directory.
+
+**Any change touching the CLI or the SDK** — `npm run check:claims` must also pass. It reads the shipped `@cloudcannon/cli` and `@cloudcannon/sdk` packages and verifies that every flag, method and stated count the skills mention still exists. It needs those packages present, which is why it is separate from `npm run check`.
+
+**MUST install them outside this repo's `node_modules`**, then point the check at them:
+
+```sh
+npm install --prefix /tmp/cc @cloudcannon/cli @cloudcannon/sdk
+CC_CLI_DIR=/tmp/cc/node_modules/@cloudcannon/cli \
+CC_SDK_DIR=/tmp/cc/node_modules/@cloudcannon/sdk \
+  npm run check:claims
+```
+
+**Why:** installing them into this repo re-resolves its own `devDependencies`, which can move prettier a minor version. A minor prettier release is free to change how it normalises quotes in YAML samples, and the next `npm run format` then rewrites unrelated files. The check needs no dependencies of its own, so it has no reason to touch the tree at all.
+
+CI runs it against pinned versions, so a PR fails only when a doc is wrong and never because a package shipped. Bump the pins in `.github/workflows/checks.yml` deliberately, and re-check the claims when you do — the script warns when the installed version is not the one the claims were verified against.

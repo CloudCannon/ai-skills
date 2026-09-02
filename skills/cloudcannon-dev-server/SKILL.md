@@ -34,7 +34,7 @@ description: >-
 
 ```sh
 bash scripts/cc-serve.sh /path/to/site     # build, postbuild, serve
-node scripts/dev-status.mjs --check /about/
+node scripts/dev-status.mjs --root /path/to/site --check /about/
 ```
 
 ## SSG coverage
@@ -51,7 +51,7 @@ Any other SSG needs `--output` and its own build command — see
 bash scripts/cc-serve.sh /path/to/site
 
 # 2. Confirm what is served, and that it is current
-node scripts/dev-status.mjs --check /about/
+node scripts/dev-status.mjs --root /path/to/site --check /about/
 
 # 3. Read a source file as the CMS sees it
 node scripts/read-file.mjs src/pages/index.md

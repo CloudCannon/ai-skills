@@ -20,3 +20,32 @@ jobs:
       - name: Links and anchors
         if: "!cancelled()"
         run: npm run check:links
+
+  # Are the skills' claims about the CLI and SDK still true? Pinned versions, so
+  # a PR fails only when the docs are wrong — never because a package shipped.
+  # Bump the pins deliberately, and re-check the claims when you do.
+  #
+  # The packages install under a prefix outside the repo, and the check needs no
+  # dependencies of its own, so this job never touches the repo's node_modules.
+  # Installing them into it re-resolves the repo's own devDependencies, which
+  # can move prettier a minor version and reformat unrelated files.
+  #
+  # Node 24 because @cloudcannon/cli declares `engines: node >= 24`. The check
+  # only reads the packages, but installing them on 20 warns.
+  claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install the documented packages
+        run: |
+          npm install --prefix "$RUNNER_TEMP/cc" \
+            @cloudcannon/cli@0.0.19 \
+            @cloudcannon/sdk@0.0.13
+      - name: Claims
+        env:
+          CC_CLI_DIR: ${{ runner.temp }}/cc/node_modules/@cloudcannon/cli
+          CC_SDK_DIR: ${{ runner.temp }}/cc/node_modules/@cloudcannon/sdk
+        run: npm run check:claims

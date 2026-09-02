@@ -104,7 +104,7 @@ The server itself needs nothing special. Two things are worth knowing:
 
 ```sh
 bash scripts/cc-serve.sh /path/to/site
-node scripts/dev-status.mjs --check /
+node scripts/dev-status.mjs --root /path/to/site --check /
 ```
 
 `dev-status.mjs` should report the served output directory, `build: output is at least as new as

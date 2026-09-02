@@ -4,7 +4,7 @@ description: >-
   Use when calling the CloudCannon API from code — constructing a client,
   finding a site or organisation UUID, reading or writing files on a hosted
   site programmatically, triggering and inspecting builds, or reaching a
-  CloudCannon endpoint the CLI has no command for (DAMs, backups, syncs, site
+  CloudCannon endpoint the CLI has no command for (DAMs, backups, sync history, site
   scans, screenshots, provider connections, copying or deleting a site).
 ---
 
@@ -18,7 +18,7 @@ Reach for it when the work is programmatic. Reach for the CLI when the work is a
 
 - Calling the CloudCannon API from a script, a build step, or a service
 - Operating over many sites or organisations in one pass
-- Reaching a surface the CLI does not expose — DAMs, backups, syncs, site scans, screenshots, provider connect/disconnect, `site.copy`, `site.delete`
+- Reaching a surface the CLI does not expose — DAMs, backups, sync history and pulls, site scans, screenshots, provider connect/disconnect, `site.copy`, `site.delete`
 - Handling API failures by type rather than by exit code
 - Finding out which methods exist, and what they take
 

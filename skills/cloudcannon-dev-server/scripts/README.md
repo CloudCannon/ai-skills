@@ -34,7 +34,7 @@ What is being served, whether it is stale, and whether given URLs resolve. **Run
 trusting anything the server shows you.**
 
 ```sh
-node dev-status.mjs --check /en/ --check /_rcc/locales.json
+node dev-status.mjs --root /path/to/site --check /en/ --check /_rcc/locales.json
 ```
 
 | Flag      | Meaning                                                                             |
