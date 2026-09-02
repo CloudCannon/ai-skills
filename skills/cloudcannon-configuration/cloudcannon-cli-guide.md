@@ -1,10 +1,12 @@
 # CloudCannon Setup with the CloudCannon CLI — AI Skill Guide
 
-This guide is for AI agents and skill file authors who want to automate CloudCannon CMS setup for a project. The CloudCannon CLI inspects a project's file structure and generates the configuration files CloudCannon needs.
+This guide covers the CLI commands that generate and validate a configuration: `configure` and `validate`. The CloudCannon CLI inspects a project's file structure and generates the configuration files CloudCannon needs.
+
+Everything else about the CLI — authenticating, operating on hosted sites, files, builds, and form submissions — is owned by [`cloudcannon-cli`](../cloudcannon-cli/SKILL.md). Go there for the full command surface and for how to query the CLI's own `documentation.json` for exact flags.
 
 ## Prerequisites
 
-- Node.js 22+ installed
+- Node.js 24+ installed (the CLI's `engines` field requires it)
 - A project with source files (HTML, Markdown, data files, etc.)
 
 ## Quick Setup (One Command)
@@ -20,7 +22,7 @@ This generates:
 - `cloudcannon.config.yml` — CloudCannon configuration with detected SSG settings, collections, and paths
 - `.cloudcannon/initial-site-settings.json` — Build settings (install command, build command, output path) so the site builds on first upload
 
-> **One-time only:** `initial-site-settings.json` is read when CloudCannon provisions the site for the first time. After that, these settings live in the CloudCannon UI and the file is ignored. If a user asks to change build commands, Node version, or other build settings for an existing site, the agent cannot make that change via code — recommend the user check **Site Settings > Builds > Configuration** in the CloudCannon dashboard instead.
+> **One-time only:** `initial-site-settings.json` is read when CloudCannon provisions the site for the first time. After that it is ignored. To change build commands, runtime versions, or other build settings on an existing site, run `cloudcannon sites update-build-config` — see [`cloudcannon-cli` § Changing build configuration](../cloudcannon-cli/commands.md#changing-build-configuration). It writes to a live site, so confirm with the user first. The same settings are also editable under **Site Settings > Builds > Configuration** in the dashboard.
 
 ## Step-by-Step Setup (More Control)
 

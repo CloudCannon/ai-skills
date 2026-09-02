@@ -48,10 +48,11 @@ Entered directly when you only need one piece ("add visual editing to my existin
 
 | Skill                        | When to use                                                                         |
 | ---------------------------- | ----------------------------------------------------------------------------------- |
-| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures, collection URLs, the CLI |
+| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures, collection URLs          |
 | `cloudcannon-snippets`       | MDX components or inline HTML in CloudCannon's Content Editor                       |
 | `cloudcannon-visual-editing` | Editable regions, so page content can be edited inline in the Visual Editor         |
 | `cloudcannon-dev-server`     | Running the site locally in CloudCannon with `cloudcannon dev`, and verifying it    |
+| `cloudcannon-cli`            | The CloudCannon CLI — authenticating, hosted sites, files, builds, form submissions |
 
 ### Operations — short tasks on a site that already works
 
@@ -75,7 +76,7 @@ Coverage is per skill: a skill supports an SSG once it has a `<ssg>/` directory 
 | `cloudcannon-visual-editing` | Yes   | —        | —       |
 | `cloudcannon-dev-server`     | Yes   | Yes      | Partial |
 
-`translate-site` and `brainstorming` are SSG-agnostic — they work the same everywhere and have no SSG directories.
+`cloudcannon-cli`, `cloudcannon-cli`, `translate-site` and `brainstorming` are SSG-agnostic — they work the same everywhere and have no SSG directories.
 
 `cloudcannon-dev-server` is the one skill whose SSG delta is not a `<ssg>/` directory — it is a
 detection table in `cc-serve.sh`. Hugo is Partial there because the script cannot detect `public/`

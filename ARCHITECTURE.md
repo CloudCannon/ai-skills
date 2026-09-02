@@ -29,6 +29,7 @@ One CloudCannon feature each. Reference-shaped — delegated to by a journey, or
 | `cloudcannon-snippets`       | MDX components and inline HTML in the Content Editor      | [SKILL.md](skills/cloudcannon-snippets/SKILL.md)       |
 | `cloudcannon-visual-editing` | Editable regions for the Visual Editor                    | [SKILL.md](skills/cloudcannon-visual-editing/SKILL.md) |
 | `cloudcannon-dev-server`     | Build, serve and verify a site under `cloudcannon dev`    | [SKILL.md](skills/cloudcannon-dev-server/SKILL.md)     |
+| `cloudcannon-cli`            | The CloudCannon CLI, and operations on hosted sites       | [SKILL.md](skills/cloudcannon-cli/SKILL.md)            |
 
 ### Operations
 
@@ -82,7 +83,7 @@ hugo/overview.md                        Hugo: tagging and pipeline (partial — 
 SKILL.md                                ENTRY POINT — the schema gate, invalid keys, symptoms
 json-schemas.md                         Querying the authoritative schemas
 troubleshooting.md                      Symptom → fix, when configuration is already wrong
-cloudcannon-cli-guide.md                CloudCannon CLI commands and options
+cloudcannon-cli-guide.md                Generating and validating config with the CLI
 structures.md                           Inline vs split, previews, field completeness
 collection-urls.md                      URL patterns — placeholders, trailing slash, troubleshooting
 astro/overview.md                       ENTRY POINT for Astro — reading order
@@ -116,6 +117,13 @@ setup.md                                Prerequisites, what `cloudcannon dev` do
 dev-server-api.md                       The `/__api` surface, events, proving a write landed
 troubleshooting.md                      Symptom → cause → fix for the server itself
 scripts/*.mjs, cc-serve.sh              Build/serve, freshness, read/write, write proof
+
+── cloudcannon-cli (capability) ──────────────────────────────
+SKILL.md                                ENTRY POINT — local/remote split, the live-site rule
+commands.md                             The command surface, and querying documentation.json
+authentication.md                       Credential methods, precedence, storage, CI
+editing-sessions.md                     `sites files` — staging, committing, discarding
+troubleshooting.md                      Symptom → cause → fix
 
 ── translate-site (operation) ────────────────────────────────
 SKILL.md                                ENTRY POINT — which part applies

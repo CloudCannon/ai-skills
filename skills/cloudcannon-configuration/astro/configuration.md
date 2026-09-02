@@ -40,7 +40,7 @@ Build settings must be nested under a `build` key. The old flat format (`build_c
 
 Prefer `.cloudcannon/prebuild` for extra setup steps so `build_command` stays a straight build, not a shell chain.
 
-**Only takes effect on first site creation.** For existing CloudCannon sites, change build settings in the CloudCannon UI (**Site Settings > Builds > Configuration**). See [cloudcannon-cli-guide.md](../cloudcannon-cli-guide.md).
+**Only takes effect on first site creation.** For existing CloudCannon sites, change build settings with `cloudcannon sites update-build-config` (see [`cloudcannon-cli` § Changing build configuration](../../cloudcannon-cli/commands.md#changing-build-configuration)) or in the CloudCannon UI under **Site Settings > Builds > Configuration**. See [cloudcannon-cli-guide.md](../cloudcannon-cli-guide.md).
 
 ## Customize the config
 

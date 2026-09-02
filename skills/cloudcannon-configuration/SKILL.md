@@ -26,6 +26,7 @@ description: >-
 - **Adding editable regions to templates** — that is [`cloudcannon-visual-editing`](../cloudcannon-visual-editing/SKILL.md). This skill configures the data behind them.
 - **MDX components or inline HTML in content** — that is [`cloudcannon-snippets`](../cloudcannon-snippets/SKILL.md)
 - **Running a full migration** — start at [`migrate-to-cloudcannon`](../migrate-to-cloudcannon/SKILL.md), which enters this skill at Phase 2
+- **Operating on a hosted site** — authenticating, listing or creating sites, reading and writing site files, triggering builds, or changing an existing site's build configuration is [`cloudcannon-cli`](../cloudcannon-cli/SKILL.md). This skill decides what a configuration should say; that one runs the commands.
 
 ## Do this before writing any configuration
 
@@ -71,13 +72,13 @@ Observed LLM hallucinations — not exhaustive, the JSON schemas are authoritati
 
 ## Contents
 
-| File                                                 | Covers                                                                                                                                            |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [json-schemas.md](json-schemas.md)                   | Querying the authoritative schemas — do this before writing any key                                                                               |
-| [cloudcannon-cli-guide.md](cloudcannon-cli-guide.md) | Generating a baseline, and `validate`. CLI output **always** needs customization — it infers no input types, structures, select data, or toolbars |
-| [structures.md](structures.md)                       | **Read early.** Every array and object Input needs a structure or editors cannot add items. Field completeness rule and definition patterns       |
-| [collection-urls.md](collection-urls.md)             | Collections that produce pages need a `url`. A wrong one is the most common reason a page fails to load in the Visual Editor                      |
-| [troubleshooting.md](troubleshooting.md)             | Symptom → fix, for when configuration is already wrong                                                                                            |
+| File                                                 | Covers                                                                                                                                                                                                                                      |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [json-schemas.md](json-schemas.md)                   | Querying the authoritative schemas — do this before writing any key                                                                                                                                                                         |
+| [cloudcannon-cli-guide.md](cloudcannon-cli-guide.md) | Generating a baseline with `configure`, and `validate`. CLI output **always** needs customization — it infers no input types, structures, select data, or toolbars. The rest of the CLI is [`cloudcannon-cli`](../cloudcannon-cli/SKILL.md) |
+| [structures.md](structures.md)                       | **Read early.** Every array and object Input needs a structure or editors cannot add items. Field completeness rule and definition patterns                                                                                                 |
+| [collection-urls.md](collection-urls.md)             | Collections that produce pages need a `url`. A wrong one is the most common reason a page fails to load in the Visual Editor                                                                                                                |
+| [troubleshooting.md](troubleshooting.md)             | Symptom → fix, for when configuration is already wrong                                                                                                                                                                                      |
 
 **SSG-specific:**
 
