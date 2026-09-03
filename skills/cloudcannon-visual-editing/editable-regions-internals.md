@@ -1,6 +1,8 @@
 # Editable Regions — Internals & API Reference
 
-**Only read this file when debugging unexpected Visual Editor behavior.** For the overview, region types, and attribute reference, see [editable-regions.md](editable-regions.md).
+The Visual Editor's JavaScript API, plus the lifecycle and internals behind it. Read the [§CloudCannon JavaScript API](#cloudcannon-javascript-api) section whenever you need to script against the editor; read the lifecycle traces and quirks when debugging unexpected behaviour.
+
+For the region types and the attribute reference, see [editable-regions.md](editable-regions.md). For the patterns that use them, see [visual-editing-reference.md](visual-editing-reference.md).
 
 ---
 
@@ -73,11 +75,11 @@ Editables form a DOM-mirroring tree. Children register as listeners on their nea
 
 CloudCannon provides three mechanisms for detecting the Visual Editor ([docs](https://cloudcannon.com/documentation/developer-articles/detecting-your-site-is-loaded-in-the-visual-editor/)):
 
-| Mechanism                        | Context           | Use for                                                                                                 |
-| -------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------- |
-| `.cms-editor-active` on `<body>` | CSS               | Overriding styles (animations, visibility). Most reliable for initial page load                         |
-| `window.inEditorMode`            | Runtime JS        | Inline `<script>` logic, conditional imports                                                            |
-| `import.meta.env.ENV_CLIENT`     | Build-time (Vite) | Astro component template expressions (only in editable-regions client bundle, not the production build) |
+| Mechanism                        | Context    | Use for                                                                                                                                                                                                                                                          |
+| -------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.cms-editor-active` on `<body>` | CSS        | Overriding styles (animations, visibility). Most reliable for initial page load                                                                                                                                                                                  |
+| `window.inEditorMode`            | Runtime JS | Inline `<script>` logic, conditional imports                                                                                                                                                                                                                     |
+| `ENV_CLIENT`                     | Build-time | Skipping build-only logic. Defined by each integration in its editable-regions client bundle only, never in the production build. Read as `import.meta.env.ENV_CLIENT` in Astro, as a template global (`{% if ENV_CLIENT %}`) in the Liquid/Eleventy integration |
 
 ### Connecting
 

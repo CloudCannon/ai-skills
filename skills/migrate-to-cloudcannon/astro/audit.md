@@ -74,7 +74,7 @@ Also flag **presentational wrapper components** (e.g. a `<Link>` that just rende
 **Why:** these can't survive source editing and need either inlining as plain HTML + CSS or a snippet config. See [visual-editing-reference.md § Astro components in source editables](../../cloudcannon-visual-editing/astro/visual-editing-reference.md#astro-components-in-source-editables).
 
 Also flag **hardcoded text in page templates**, but classify it through the census table below -- not by defaulting to source-editable.
-**Why:** hero sections, CTA copy, and section headings on listing pages almost always belong in a page-builder `pages` collection entry, not pinned to the `.astro` source. Source-editable is reserved for long-form prose where the layout _is_ the body. See [visual-editing-reference.md § When to use source editables](../../cloudcannon-visual-editing/astro/visual-editing-reference.md#when-to-use-source-editables).
+**Why:** hero sections, CTA copy, and section headings on listing pages almost always belong in a page-builder `pages` collection entry, not pinned to the `.astro` source. Source-editable is reserved for long-form prose where the layout _is_ the body. See [visual-editing-reference.md § When to use source editables](../../cloudcannon-visual-editing/visual-editing-reference.md#when-to-use-source-editables).
 
 ### Classifying static pages: source editables vs. content collection
 
@@ -150,7 +150,7 @@ Note anything that needs special handling in later phases:
 - **Styled HTML in content fields** -- flag fields that contain inline HTML with CSS classes (`<span class="text-accent">`), HTML entities (`&nbsp;`), or `<br>` tags with responsive classes (`<br class="block sm:hidden" />`) when migrating hardcoded `.astro` pages to content collection frontmatter.
   **Why:** these render on the live site but are uneditable in CloudCannon's rich text editors (custom HTML shows red outlines). They need resolution during the content phase -- see [content.md § Handling styled HTML in frontmatter](content.md#handling-styled-html-in-frontmatter).
 - **Scroll-reveal / entrance animations** -- search for `opacity: 0` in CSS, `IntersectionObserver` in JS, and class names like `reveal`, `aos`, `animate-on-scroll`, `fade-in`, `scroll-fade`.
-  **Why:** these hide content until scrolled into view and break in the visual editor. Note the files responsible so they can be patched in Phase 4. See [visual-editing-reference.md § Scroll-reveal](../../cloudcannon-visual-editing/astro/visual-editing-reference.md#scroll-reveal-and-entrance-animations).
+  **Why:** these hide content until scrolled into view and break in the visual editor. Note the files responsible so they can be patched in Phase 4. See [visual-editing-reference.md § Scroll-reveal](../../cloudcannon-visual-editing/visual-editing-reference.md#scroll-reveal-and-entrance-animations).
 - Pre-build code generation that must run for the site to build
 - **Inline HTML in markdown content that has no markdown equivalent** -- scan `.md` content files for HTML blocks like `<figure>`, `<video>`, `<details>`, `<iframe>`.
   **Why:** if the pattern can't be expressed in standard markdown, it's a snippet candidate. Document each pattern (tag structure, attributes, which values vary between instances) as input for `_snippets` configuration in Phase 2. This applies to `.md` files only — MDX component usage is covered separately above. See [snippets.md § Raw snippets for inline HTML](../../cloudcannon-snippets/snippets.md#raw-snippets-for-inline-html-in-md-files).

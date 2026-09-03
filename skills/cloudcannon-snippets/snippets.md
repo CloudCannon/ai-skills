@@ -87,7 +87,7 @@ _editables:
 
 ## When NOT to use a snippet
 
-If a rich text field contains structured HTML with a fixed layout and only a few changing values (e.g. a banner with specific classes for centering and link styling), don't define it as a snippet. Instead, decompose the HTML into explicit props and let the component own the markup. See [visual-editing-reference.md § Where does a value belong](../cloudcannon-visual-editing/astro/visual-editing-reference.md#where-does-a-value-belong--frontmatter-structure-value-default-or-hardcoded) for the full pattern.
+If a rich text field contains structured HTML with a fixed layout and only a few changing values (e.g. a banner with specific classes for centering and link styling), don't define it as a snippet. Instead, decompose the HTML into explicit props and let the component own the markup. See [visual-editing-reference.md § Where does a value belong](../cloudcannon-visual-editing/visual-editing-reference.md#where-does-a-value-belong--frontmatter-structure-value-default-or-hardcoded) for the full pattern.
 
 ---
 
