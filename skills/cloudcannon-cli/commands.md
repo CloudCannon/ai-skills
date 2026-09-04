@@ -1,6 +1,6 @@
 # Command surface
 
-35 commands across eight groups. This file maps them; it does not restate their flags, because those change between releases and the package ships an authoritative machine-readable copy.
+As of 0.0.19, 35 commands across eight groups. This file maps them; it does not restate their flags, because those change between releases and the package ships an authoritative machine-readable copy.
 
 ## Discovering the exact flags
 

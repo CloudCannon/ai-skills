@@ -6,10 +6,15 @@
     "format:check": "prettier --check \"**/*.md\"",
     "check:links": "node scripts/check-links.mjs",
     "check:claims": "node scripts/check-claims.mjs",
+    "diff:surface": "node scripts/diff-surface.mjs",
     "check": "npm run format:check && npm run check:links"
   },
   "devDependencies": {
     "github-slugger": "^2.0.0",
     "prettier": "^3.3.3"
+  },
+  "documentedPackages": {
+    "@cloudcannon/cli": "0.0.19",
+    "@cloudcannon/sdk": "0.0.13"
   }
 }

@@ -156,17 +156,38 @@ SKILL.md                                Single file — design dialogue, then ha
 
 **Every change** — `npm run check` must pass. It verifies formatting, that every relative link and `#anchor` resolves, and that each `SKILL.md`'s frontmatter `name` matches its directory.
 
-**Any change touching the CLI or the SDK** — `npm run check:claims` must also pass. It reads the shipped `@cloudcannon/cli` and `@cloudcannon/sdk` packages and verifies that every flag, method and stated count the skills mention still exists. It needs those packages present, which is why it is separate from `npm run check`.
+**Any change touching the CLI or the SDK** — `npm run check:claims` must also pass. It reads the shipped `@cloudcannon/cli` and `@cloudcannon/sdk` packages and verifies that every flag and method the skills mention still exists. It needs those packages present, which is why it is separate from `npm run check`.
 
-**MUST install them outside this repo's `node_modules`**, then point the check at them:
+`--install` fetches the pinned versions under a temp prefix outside the repo and runs the check against them:
 
 ```sh
-npm install --prefix /tmp/cc @cloudcannon/cli @cloudcannon/sdk
-CC_CLI_DIR=/tmp/cc/node_modules/@cloudcannon/cli \
-CC_SDK_DIR=/tmp/cc/node_modules/@cloudcannon/sdk \
-  npm run check:claims
+npm run check:claims -- --install
 ```
 
-**Why:** installing them into this repo re-resolves its own `devDependencies`, which can move prettier a minor version. A minor prettier release is free to change how it normalises quotes in YAML samples, and the next `npm run format` then rewrites unrelated files. The check needs no dependencies of its own, so it has no reason to touch the tree at all.
+**MUST NOT install them into this repo's `node_modules`.** Doing so re-resolves its own `devDependencies`, which can move prettier a minor version. A minor prettier release is free to change how it normalises quotes in YAML samples, and the next `npm run format` then rewrites unrelated files. The check needs no dependencies of its own, so it has no reason to touch the tree at all.
 
-CI runs it against pinned versions, so a PR fails only when a doc is wrong and never because a package shipped. Bump the pins in `.github/workflows/checks.yml` deliberately, and re-check the claims when you do — the script warns when the installed version is not the one the claims were verified against.
+To check against a copy already on disk — a release candidate, or a local build — point the check at it instead. It reports the version, and warns when it is not the one the claims were verified against:
+
+```sh
+npm run check:claims -- --cli-dir ../cli --sdk-dir ../sdk   # or CC_CLI_DIR / CC_SDK_DIR
+```
+
+CI runs the same `--install` command, so a PR fails only when a doc is wrong and never because a package shipped. **The pins live in one place: `documentedPackages` in `package.json`.** Bump them there deliberately, and re-check the claims when you do.
+
+### Before bumping a pin
+
+`check:claims` runs one direction only: every flag and method the skills name has to exist. It is blind to the opposite case — surface the package gained that the skills have never mentioned. Nothing fails, because there is no claim to falsify.
+
+```sh
+npm run diff:surface                      # pinned → latest published
+npm run diff:surface -- --cli-to 0.0.20   # a specific version
+```
+
+It diffs `documentation.json` and the SDK's `.d.ts` files between the two versions and says, for each name that appeared or vanished, whether the skills already cover it:
+
+```
+  + dev --host                                         documented at skills/cloudcannon-dev-server/setup.md:28
+  + sites update-build-config --environment-variables  UNDOCUMENTED
+```
+
+**Don't reach for the changelog instead.** Neither package ships one, and their GitHub releases are generated from PR titles, so a release that adds two flags can read "Add some requested options". Read the PR bodies for _semantics_ — a default that changed, a flag that means something new — and let the diff cover existence, which is all `check:claims` can police.

@@ -10,30 +10,45 @@
  *   1. Every `--flag` on a `cloudcannon …` invocation exists on *that* command.
  *   2. Every `--flag` named elsewhere exists on some command.
  *   3. Every `receiver.method()` in the SDK skill's prose exists on that client.
- *   4. Stated counts still match — a warning. They are descriptive, and a
- *      drifted count misleads nobody.
+ *
+ * It checks one direction only. A flag the package gained and the skills never
+ * mention is invisible here; `diff-surface.mjs` covers that.
  *
  * The packages are read, never executed: no engine constraint, no dependencies.
- * They are NOT dependencies of this repo — install them outside it, because
- * installing into it re-resolves this repo's own devDependencies:
+ * They are NOT dependencies of this repo — `--install` puts the pinned versions
+ * under a temp prefix, because installing into the repo re-resolves its own
+ * devDependencies:
  *
- *   npm install --prefix /tmp/cc @cloudcannon/cli @cloudcannon/sdk
- *   CC_CLI_DIR=/tmp/cc/node_modules/@cloudcannon/cli \
- *   CC_SDK_DIR=/tmp/cc/node_modules/@cloudcannon/sdk npm run check:claims
+ *   npm run check:claims -- --install
  *
- * Usage: node scripts/check-claims.mjs [--quiet]
+ * The pins are package.json's `documentedPackages`; CI runs the same command.
+ *
+ * Usage: node scripts/check-claims.mjs [--quiet] [--install]
+ *                                      [--cli-dir <path>] [--sdk-dir <path>]
+ *
+ * `--cli-dir` / `--sdk-dir` (or `CC_CLI_DIR` / `CC_SDK_DIR`) point the check at
+ * a copy already on disk, at whatever version it happens to be.
  */
 
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
-import { join, dirname, resolve, relative, extname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync, existsSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
+import {
+  CLI_PKG,
+  PINS,
+  ROOT,
+  SDK_PKG,
+  SKILLS,
+  flagValue,
+  installPinned,
+  packageDir,
+  readCliCommands,
+  readSdkClients,
+  versionOf,
+  walkMarkdown,
+} from "./lib/packages.mjs";
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SKILLS = join(ROOT, "skills");
-const QUIET = process.argv.includes("--quiet");
-
-/** The versions the claims were verified against. A mismatch is a warning. */
-const VERIFIED_AGAINST = { "@cloudcannon/cli": "0.0.19", "@cloudcannon/sdk": "0.0.13" };
+const ARGV = process.argv.slice(2);
+const QUIET = ARGV.includes("--quiet");
 
 /**
  * Things the skills name in order to warn agents off them. Keyed `file::token`
@@ -61,66 +76,38 @@ function fail(file, line, token, msg) {
 
 /* --- Locating and reading the packages --- */
 
-function findPackage(name, envVar) {
-  const candidates = process.env[envVar]
-    ? [resolve(process.env[envVar])]
-    : [
-        join(ROOT, "node_modules", ...name.split("/")),
-        join(ROOT, "..", "venture-skills-copy", "node_modules", ...name.split("/")),
-      ];
-  for (const dir of candidates) if (existsSync(join(dir, "package.json"))) return dir;
+const INSTALL_PREFIX = ARGV.includes("--install") ? installPinned() : null;
+
+function findPackage(name, envVar, dirFlag) {
+  const override = flagValue(ARGV, dirFlag) ?? process.env[envVar];
+  const dir = override ? resolve(override) : packageDir(name, INSTALL_PREFIX ?? ROOT);
+  if (dir && existsSync(join(dir, "package.json"))) return dir;
   console.error(
     `check-claims: cannot find ${name}.\n\n` +
-      `  npm install --prefix /tmp/cc ${name}\n\n` +
-      `then set ${envVar} to /tmp/cc/node_modules/${name}.`,
+      `  npm run check:claims -- --install\n\n` +
+      `installs the pinned versions outside this repo and runs the check. ` +
+      `To use a copy already on disk, pass --${dirFlag} <path> or set ${envVar}.`,
   );
   process.exit(2);
 }
 
-const CLI_DIR = findPackage("@cloudcannon/cli", "CC_CLI_DIR");
-const SDK_DIR = findPackage("@cloudcannon/sdk", "CC_SDK_DIR");
+const CLI_DIR = findPackage(CLI_PKG, "CC_CLI_DIR", "cli-dir");
+const SDK_DIR = findPackage(SDK_PKG, "CC_SDK_DIR", "sdk-dir");
 
-for (const [name, dir] of Object.entries({
-  "@cloudcannon/cli": CLI_DIR,
-  "@cloudcannon/sdk": SDK_DIR,
-})) {
-  const { version } = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
-  if (version !== VERIFIED_AGAINST[name]) {
+// A warning, not a failure: `--cli-dir` may point at any version. It is also
+// the only thing here that fires on a bump, so it names the diff to run.
+for (const [name, dir, flagPrefix] of [
+  [CLI_PKG, CLI_DIR, "cli"],
+  [SDK_PKG, SDK_DIR, "sdk"],
+]) {
+  const version = versionOf(dir);
+  if (version !== PINS[name]) {
     warnings.push(
-      `${name} is ${version}; claims were verified against ${VERIFIED_AGAINST[name]}. ` +
-        `Re-check them, then update VERIFIED_AGAINST.`,
+      `${name} is ${version}; claims were verified against ${PINS[name]}. ` +
+        `Run \`node scripts/diff-surface.mjs --${flagPrefix}-to ${version}\` to see what moved, ` +
+        `re-check the claims, then bump documentedPackages in package.json.`,
     );
   }
-}
-
-/** Every leaf CLI command, keyed by its path without the `cloudcannon ` prefix. */
-function readCliCommands() {
-  const doc = JSON.parse(readFileSync(join(CLI_DIR, "dist", "documentation.json"), "utf8"));
-  const byPath = new Map();
-  const walk = (arr) => {
-    for (const c of arr || []) {
-      if (c.subCommands?.length) walk(c.subCommands);
-      else
-        byPath.set(
-          c.fullName.replace(/^cloudcannon\s+/, ""),
-          new Set((c.options || []).map((o) => o.name)),
-        );
-    }
-  };
-  walk(doc.subCommands);
-  return byPath;
-}
-
-/** Method names declared on a sub-client, read from its generated `.d.ts`. */
-function readSdkMethods(file) {
-  const src = readFileSync(join(SDK_DIR, "dist", file), "utf8");
-  // `[<(]` catches a generic method: `fetch<const U ...>(` has nested angle
-  // brackets, so nothing can match across to its closing `>`.
-  const names = new Set(
-    [...src.matchAll(/^ {4}(?:readonly\s+)?([a-zA-Z_]\w*)\s*[<(]/gm)].map((m) => m[1]),
-  );
-  names.delete("constructor");
-  return names;
 }
 
 /** Flags `cc-serve.sh` defines for itself, parsed from its own option parser. */
@@ -131,7 +118,7 @@ function readServeFlags() {
   return [...src.matchAll(/^\s*--([a-z][a-z0-9-]*)\s*\)/gm)].map((m) => m[1]);
 }
 
-const CLI_COMMANDS = readCliCommands();
+const CLI_COMMANDS = readCliCommands(CLI_DIR);
 
 /** Accepted everywhere, so absent from `documentation.json`'s per-command options. */
 const CLI_GLOBAL_FLAGS = new Set(["help", "version"]);
@@ -151,29 +138,9 @@ const OTHER_TOOL_FLAGS = new Set([
   ...readServeFlags(),
 ]);
 
-const SDK_CLIENTS = {
-  root: readSdkMethods("index.d.ts"),
-  org: readSdkMethods("src/org.d.ts"),
-  site: readSdkMethods("src/site.d.ts"),
-  editingSession: readSdkMethods("src/editing-session.d.ts"),
-  editingSessionFile: readSdkMethods("src/editing-session-file.d.ts"),
-  build: readSdkMethods("src/build.d.ts"),
-  sync: readSdkMethods("src/sync.d.ts"),
-  backup: readSdkMethods("src/backup.d.ts"),
-  inbox: readSdkMethods("src/inbox.d.ts"),
-  siteInbox: readSdkMethods("src/site-inbox.d.ts"),
-};
+const SDK_CLIENTS = readSdkClients(SDK_DIR);
 
 /* --- Reading the skills --- */
-
-function walkMarkdown(dir, out = []) {
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walkMarkdown(full, out);
-    else if (extname(full) === ".md") out.push(full);
-  }
-  return out;
-}
 
 const FILES = walkMarkdown(SKILLS).sort();
 
@@ -283,32 +250,6 @@ for (const file of FILES.filter((f) => f.includes("cloudcannon-sdk"))) {
         }
       }
     });
-}
-
-/* --- 4. Stated counts — warnings only --- */
-
-const schema = readFileSync(join(SDK_DIR, "dist", "schema.d.ts"), "utf8");
-const count = (src, re) => [...src.matchAll(re)].length;
-
-const COUNTS = [
-  ["35 CLI commands", "cloudcannon-cli/commands.md", CLI_COMMANDS.size, 35],
-  [
-    "62 documented SDK methods",
-    "cloudcannon-sdk/api-surface.md",
-    count(readFileSync(join(SDK_DIR, "README.md"), "utf8"), /^#### /gm),
-    62,
-  ],
-  ["29 site methods", "cloudcannon-sdk/api-surface.md", SDK_CLIENTS.site.size, 29],
-  [
-    "168 API paths",
-    "cloudcannon-sdk/api-surface.md",
-    count(schema, /^ {4}'\/api\/v0[^']*':/gm),
-    168,
-  ],
-];
-
-for (const [claim, statedIn, actual, expected] of COUNTS) {
-  if (actual !== expected) warnings.push(`${statedIn} states ${claim}; package has ${actual}`);
 }
 
 /* --- Report --- */
