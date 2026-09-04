@@ -27,9 +27,21 @@ export async function details(flags) {
 	return res.json();
 }
 
+/**
+ * Percent-encodes each segment of a source path, separators kept.
+ *
+ * `#` and `?` in a filename are a fragment and a query to a URL parser, so a
+ * raw path addresses a shorter one: a POST to `notes#draft.md` returns 200 and
+ * writes `notes`. The server decodes escapes, and /__api/details hands out such
+ * names.
+ */
+function encodePath(path) {
+	return stripLeadingSlash(path).split("/").map(encodeURIComponent).join("/");
+}
+
 /** { content, file_size, last_modified } for a source-relative path. */
 export async function fileInfo(path, flags) {
-	const res = await req(`${baseUrl(flags)}/__api/file/${stripLeadingSlash(path)}`);
+	const res = await req(`${baseUrl(flags)}/__api/file/${encodePath(path)}`);
 	if (res.status === 404) return null;
 	if (!res.ok) throw new Error(`/__api/file returned ${res.status}`);
 	return res.json();
@@ -37,7 +49,7 @@ export async function fileInfo(path, flags) {
 
 /** Writes a file to disk exactly as the CMS would. */
 export async function upload(path, content, flags) {
-	const res = await req(`${baseUrl(flags)}/__api/upload/${stripLeadingSlash(path)}`, {
+	const res = await req(`${baseUrl(flags)}/__api/upload/${encodePath(path)}`, {
 		method: "POST",
 		body: content,
 	});

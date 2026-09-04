@@ -56,6 +56,6 @@ try {
 	fail(err.message);
 }
 
-console.log(
-	`${before ? "updated" : "created"} ${path} (${content.length} bytes)`,
-);
+// UTF-8 bytes, to agree with the file_size the API reports.
+const bytes = Buffer.byteLength(content, "utf8");
+console.log(`${before ? "updated" : "created"} ${path} (${bytes} bytes)`);

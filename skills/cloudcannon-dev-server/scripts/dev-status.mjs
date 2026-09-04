@@ -12,8 +12,8 @@
  *   node dev-status.mjs --check /en/ --check /fr/
  */
 
-import { statSync } from "node:fs";
-import { join } from "node:path";
+import { readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 import { parseArgs, handleHelp } from "./lib/args.mjs";
 import { details, fetchOutput, baseUrl } from "./lib/devserver.mjs";
 
@@ -75,10 +75,41 @@ const sources = info.sourceFiles.filter(
 );
 const src = newestMtime(sources);
 
-let outMtime = 0;
-try {
-	outMtime = statSync(join(root, info.outputDir)).mtimeMs;
-} catch {}
+/**
+ * The newest file anywhere under the output directory.
+ *
+ * A directory's own mtime is not its build time: it moves when an entry is
+ * added or removed, not when a file inside is rewritten. Comparing against it
+ * calls an in-place rebuild stale, and a stray dropped file fresh. Symlinked
+ * directories are not followed.
+ */
+function newestOutputMtime(dir) {
+	let newest = 0;
+	let which = null;
+	let entries;
+	try {
+		entries = readdirSync(dir, { withFileTypes: true });
+	} catch {
+		return { newest, which };
+	}
+	for (const entry of entries) {
+		const full = join(dir, entry.name);
+		const found = entry.isDirectory() ? newestOutputMtime(full) : fileMtime(full);
+		if (found.newest > newest) ({ newest, which } = found);
+	}
+	return { newest, which };
+}
+
+function fileMtime(full) {
+	try {
+		return { newest: statSync(full).mtimeMs, which: full };
+	} catch {
+		return { newest: 0, which: null };
+	}
+}
+
+const out = newestOutputMtime(join(root, info.outputDir));
+const outMtime = out.newest;
 
 // The paths from /__api/details are relative to the site, so a --root pointing
 // anywhere else resolves none of them. That must not read as a clean bill of
@@ -89,17 +120,22 @@ try {
 if (!src.found || !outMtime) {
 	const missing = !src.found
 		? `any of its ${sources.length} source files`
-		: `its ${info.outputDir}/ directory`;
+		: `any file under its ${info.outputDir}/ directory`;
 	console.log(`build:     UNKNOWN — could not find ${missing} under ${root}`);
 	console.log("           staleness NOT checked. Pass --root <site directory>.");
 } else if (src.newest > outMtime) {
-	const mins = Math.round((src.newest - outMtime) / 60000);
 	console.log(
-		`\nSTALE: ${src.which} is ${mins} minute(s) newer than ${info.outputDir}/.` +
+		`\nSTALE: ${src.which} is ${ago(src.newest - outMtime)} newer than ${relative(root, out.which)}.` +
 			"\n       Rebuild before trusting anything you see — cloudcannon dev does not build.",
 	);
 } else {
-	console.log("build:     output is at least as new as the sources");
+	console.log(`build:     ${relative(root, out.which)} is at least as new as every source`);
+}
+
+/** A gap of seconds is the common case — a rebuild that just ran. */
+function ago(ms) {
+	const mins = Math.round(ms / 60000);
+	return mins < 1 ? `${Math.max(1, Math.round(ms / 1000))} second(s)` : `${mins} minute(s)`;
 }
 
 // --- Reachability checks ---
