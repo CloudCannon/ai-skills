@@ -26,21 +26,23 @@ description: >-
 
 ## Contents
 
-| Doc                                                            | When to read                                                                        |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| [editable-regions.md](editable-regions.md)                     | Start here. Region types, attribute reference, when to use components vs primitives |
-| [editable-regions-internals.md](editable-regions-internals.md) | Only when debugging. Lifecycle traces, JavaScript API reference                     |
-| [troubleshooting.md](troubleshooting.md)                       | Symptom → fix, when regions do not appear, update, or write where expected          |
+| Doc                                                            | When to read                                                                    |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [editable-regions.md](editable-regions.md)                     | Start here. Region types, the attribute reference, custom-element equivalents   |
+| [visual-editing-reference.md](visual-editing-reference.md)     | On demand. Data-prop paths, arrays, page builders, components, source editables |
+| [editable-regions-internals.md](editable-regions-internals.md) | The Visual Editor JavaScript API; lifecycle traces and quirks when debugging    |
+| [troubleshooting.md](troubleshooting.md)                       | Symptom → fix, when regions do not appear, update, or write where expected      |
 
 **SSG-specific:**
 
 Enter through the SSG's `overview.md`; it gives the reading order for that SSG's files.
 
-| SSG   | Doc                                                                    | Purpose                                                                    |
-| ----- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Astro | [astro/overview.md](astro/overview.md)                                 | **Start here for Astro** — reading order and what each file covers         |
-| Astro | [astro/visual-editing.md](astro/visual-editing.md)                     | Setup workflow, section census, infrastructure + completeness checklists   |
-| Astro | [astro/visual-editing-reference.md](astro/visual-editing-reference.md) | Pattern reference (read sections on demand as the checklist links to them) |
+| SSG   | Doc                                                                    | Purpose                                                                  |
+| ----- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Astro | [astro/overview.md](astro/overview.md)                                 | **Start here for Astro** — reading order and what each file covers       |
+| Astro | [astro/visual-editing.md](astro/visual-editing.md)                     | Setup workflow, section census, infrastructure + completeness checklists |
+| Astro | [astro/visual-editing-reference.md](astro/visual-editing-reference.md) | Astro's deltas from the generic pattern reference (read on demand)       |
+| Astro | [astro/troubleshooting.md](astro/troubleshooting.md)                   | Astro-specific symptom → fix                                             |
 
 **Scripts:**
 

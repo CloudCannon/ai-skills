@@ -23,11 +23,14 @@ Long, multi-phase, run once against a site. They keep state in `.cloudcannon/mig
 
 One CloudCannon feature each. Reference-shaped — delegated to by a journey, or entered directly on a site that is already migrated.
 
-| Skill                        | Purpose                                                   | Entry point                                            |
-| ---------------------------- | --------------------------------------------------------- | ------------------------------------------------------ |
-| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures | [SKILL.md](skills/cloudcannon-configuration/SKILL.md)  |
-| `cloudcannon-snippets`       | MDX components and inline HTML in the Content Editor      | [SKILL.md](skills/cloudcannon-snippets/SKILL.md)       |
-| `cloudcannon-visual-editing` | Editable regions for the Visual Editor                    | [SKILL.md](skills/cloudcannon-visual-editing/SKILL.md) |
+| Skill                        | Purpose                                                             | Entry point                                            |
+| ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| `cloudcannon-configuration`  | `cloudcannon.config.yml`, collections, inputs, structures           | [SKILL.md](skills/cloudcannon-configuration/SKILL.md)  |
+| `cloudcannon-snippets`       | MDX components and inline HTML in the Content Editor                | [SKILL.md](skills/cloudcannon-snippets/SKILL.md)       |
+| `cloudcannon-visual-editing` | Editable regions for the Visual Editor                              | [SKILL.md](skills/cloudcannon-visual-editing/SKILL.md) |
+| `cloudcannon-dev-server`     | Build, serve and verify a site under `cloudcannon dev`              | [SKILL.md](skills/cloudcannon-dev-server/SKILL.md)     |
+| `cloudcannon-cli`            | The CloudCannon CLI, and operations on hosted sites                 | [SKILL.md](skills/cloudcannon-cli/SKILL.md)            |
+| `cloudcannon-sdk`            | The CloudCannon API from code, and the surface the CLI cannot reach | [SKILL.md](skills/cloudcannon-sdk/SKILL.md)            |
 
 ### Operations
 
@@ -81,7 +84,7 @@ hugo/overview.md                        Hugo: tagging and pipeline (partial — 
 SKILL.md                                ENTRY POINT — the schema gate, invalid keys, symptoms
 json-schemas.md                         Querying the authoritative schemas
 troubleshooting.md                      Symptom → fix, when configuration is already wrong
-cloudcannon-cli-guide.md                CloudCannon CLI commands and options
+cloudcannon-cli-guide.md                Generating and validating config with the CLI
 structures.md                           Inline vs split, previews, field completeness
 collection-urls.md                      URL patterns — placeholders, trailing slash, troubleshooting
 astro/overview.md                       ENTRY POINT for Astro — reading order
@@ -109,6 +112,28 @@ astro/visual-editing.md                 Phase 4: workflow, census, checklists
 astro/visual-editing-reference.md       ON DEMAND — pattern reference, do not read front to back
 scripts/setup-editable-regions.sh       Installs package, wires Astro integration
 
+── cloudcannon-dev-server (capability) ───────────────────────
+SKILL.md                                ENTRY POINT — the build-first rule, quick start, scripts
+setup.md                                Prerequisites, what `cloudcannon dev` does, build/serve, ports
+dev-server-api.md                       The `/__api` surface, events, proving a write landed
+troubleshooting.md                      Symptom → cause → fix for the server itself
+scripts/*.mjs, cc-serve.sh              Build/serve, freshness, read/write, write proof
+
+── cloudcannon-cli (capability) ──────────────────────────────
+SKILL.md                                ENTRY POINT — local/remote split, the live-site rule
+commands.md                             The command surface, and querying documentation.json
+authentication.md                       Credential methods, precedence, storage, CI
+editing-sessions.md                     `sites files` — staging, committing, discarding
+troubleshooting.md                      Symptom → cause → fix
+
+── cloudcannon-sdk (capability) ──────────────────────────────
+SKILL.md                                ENTRY POINT — routing, the write gate, requirements
+client.md                               Constructing the client; why it reads no credentials itself
+resources.md                            Sub-client hierarchy, UUID addressing, pagination, return types
+api-surface.md                          Reading the shipped method list; the raw client.fetch escape hatch
+editing-sessions.md                     Writing files to a hosted site through the SDK
+troubleshooting.md                      Symptom → cause → fix
+
 ── translate-site (operation) ────────────────────────────────
 SKILL.md                                ENTRY POINT — which part applies
 locale-files.md                         Part 1 — rosey/locales/{code}.json (most sites)
@@ -130,3 +155,39 @@ SKILL.md                                Single file — design dialogue, then ha
 **New skill** — pick its tier first (journey, capability, or operation); the tier fixes the name and the entry shape. Start from a skeleton in [templates/](templates/), then add it to the tier tables above and to the README.
 
 **Every change** — `npm run check` must pass. It verifies formatting, that every relative link and `#anchor` resolves, and that each `SKILL.md`'s frontmatter `name` matches its directory.
+
+**Any change touching the CLI or the SDK** — `npm run check:claims` must also pass. It reads the shipped `@cloudcannon/cli` and `@cloudcannon/sdk` packages and verifies that every flag and method the skills mention still exists. It needs those packages present, which is why it is separate from `npm run check`.
+
+`--install` fetches the pinned versions under a temp prefix outside the repo and runs the check against them:
+
+```sh
+npm run check:claims -- --install
+```
+
+**MUST NOT install them into this repo's `node_modules`.** Doing so re-resolves its own `devDependencies`, which can move prettier a minor version. A minor prettier release is free to change how it normalises quotes in YAML samples, and the next `npm run format` then rewrites unrelated files. The check needs no dependencies of its own, so it has no reason to touch the tree at all.
+
+To check against a copy already on disk — a release candidate, or a local build — point the check at it instead. It reports the version, and warns when it is not the one the claims were verified against:
+
+```sh
+npm run check:claims -- --cli-dir ../cli --sdk-dir ../sdk   # or CC_CLI_DIR / CC_SDK_DIR
+```
+
+CI runs the same `--install` command, so a PR fails only when a doc is wrong and never because a package shipped. **The pins live in one place: `documentedPackages` in `package.json`.** Bump them there deliberately, and re-check the claims when you do.
+
+### Before bumping a pin
+
+`check:claims` runs one direction only: every flag and method the skills name has to exist. It is blind to the opposite case — surface the package gained that the skills have never mentioned. Nothing fails, because there is no claim to falsify.
+
+```sh
+npm run diff:surface                      # pinned → latest published
+npm run diff:surface -- --cli-to 0.0.20   # a specific version
+```
+
+It diffs `documentation.json` and the SDK's `.d.ts` files between the two versions and says, for each name that appeared or vanished, whether the skills already cover it:
+
+```
+  + dev --host                                         documented at skills/cloudcannon-dev-server/setup.md:28
+  + sites update-build-config --environment-variables  UNDOCUMENTED
+```
+
+**Don't reach for the changelog instead.** Neither package ships one, and their GitHub releases are generated from PR titles, so a release that adds two flags can read "Add some requested options". Read the PR bodies for _semantics_ — a default that changed, a flag that means something new — and let the diff cover existence, which is all `check:claims` can police.

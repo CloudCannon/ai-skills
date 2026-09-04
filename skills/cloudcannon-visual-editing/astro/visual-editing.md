@@ -1,6 +1,6 @@
 # Visual Editing (Astro)
 
-Workflow for adding CloudCannon Visual Editor support to an Astro site using `@cloudcannon/editable-regions`. Pattern details and code examples live in [visual-editing-reference.md](visual-editing-reference.md) — read sections on demand as checklist items link to them. For the general editable regions API, see [../editable-regions.md](../editable-regions.md).
+Workflow for adding CloudCannon Visual Editor support to an Astro site using `@cloudcannon/editable-regions`. The generic patterns behind these checks live in [../visual-editing-reference.md](../visual-editing-reference.md), and Astro's deltas from them in [visual-editing-reference.md](visual-editing-reference.md) — read sections on demand as checklist items link to them. For the region types and attribute reference, see [../editable-regions.md](../editable-regions.md).
 
 ## Setup steps
 
@@ -72,7 +72,7 @@ Before writing any editable attributes, produce a census of every visible sectio
 
 #### Rules for `sidebar-only` justification
 
-"Uses third-party npm components" is NOT sufficient on its own — most third-party components can still be wrapped in `<editable-component>` for sidebar-triggered re-rendering. See [visual-editing-reference.md § Third-party component fields](visual-editing-reference.md#third-party-component-fields).
+"Uses third-party npm components" is NOT sufficient on its own — most third-party components can still be wrapped in `<editable-component>` for sidebar-triggered re-rendering. See [visual-editing-reference.md § Third-party component fields](../visual-editing-reference.md#third-party-component-fields).
 
 **Valid reasons:** The component genuinely can't be wrapped (shadow DOM, framework incompatibility after attempting conversion) AND the section is still wrapped in `<editable-component>` for re-rendering.
 
@@ -117,71 +117,71 @@ Work through every item after implementing editable regions. Each item links to 
       → [configuration.md](../../cloudcannon-configuration/astro/configuration.md)
 - [ ] **Census coverage**: Every section in the census has editable regions OR a documented justification that meets the `sidebar-only` rules above
 - [ ] **Array containers**: Every array rendered from frontmatter/data has `data-editable="array"` + `data-prop` on the container AND `data-editable="array-item"` on each item
-      → [Array editing](visual-editing-reference.md#array-editing)
+      → [Array editing](../visual-editing-reference.md#array-editing)
 - [ ] **Per-`.map()` census** — for each `.map()` in a registered component:
   - [ ] iterating element has `data-editable="array" data-prop="<key>"`
   - [ ] each iterated row has `data-editable="array-item"`
   - [ ] each text field inside the row has `data-editable="text" data-prop="<rowKey>"`
   - [ ] each image inside the row has `data-editable="image" data-prop="<rowKey>"`
   - [ ] **Verify**: in visual mode, clicking a row outlines the row; clicking a field inside outlines the field. If nothing highlights, markers are missing — sidebar-editable ≠ visual-editable.
-        → [Array editing](visual-editing-reference.md#array-editing)
+        → [Array editing](../visual-editing-reference.md#array-editing)
 - [ ] **Nested editables in array items**: Every array item has nested `data-editable="text"` / `data-editable="image"` (or `<editable-text>` / `<editable-image>`) on its visible fields.
-      → [Array editing](visual-editing-reference.md#array-editing)
+      → [Array editing](../visual-editing-reference.md#array-editing)
 - [ ] **Array path scope**: Inside `data-editable="array-item"`, every nested `data-prop` is **relative** to the item (`data-prop="heading"`, `data-prop="links"`).
-      → [Arrays inside data files](visual-editing-reference.md#arrays-inside-data-files)
+      → [Arrays inside data files](../visual-editing-reference.md#arrays-inside-data-files)
 - [ ] **Array container purity**: Every `data-editable="array"` wrapper contains **only** elements produced by the array (`data-editable="array-item"` rows plus optional `<template>` blueprints).
-      → [Don't mix array items with non-array siblings](visual-editing-reference.md#dont-mix-array-items-with-non-array-siblings)
+      → [Don't mix array items with non-array siblings](../visual-editing-reference.md#dont-mix-array-items-with-non-array-siblings)
 - [ ] **Image editables**: Every image rendered from frontmatter/data has an `<editable-image>` wrapper or `data-editable="image"` on the `<img>` itself
-      → [Image editing](visual-editing-reference.md#image-editing)
+      → [Image editing](../visual-editing-reference.md#image-editing)
 - [ ] **Child component labels**: Components with hardcoded section titles, button text, or icons are either: (a) extracted to frontmatter/data and made editable, or (b) have source editables on the hardcoded text.
-      → [Section titles and buttons](visual-editing-reference.md#section-titles-and-buttons-in-child-components)
+      → [Section titles and buttons](../visual-editing-reference.md#section-titles-and-buttons-in-child-components)
 - [ ] **Registration wiring**: Every component in `registerComponents.ts` is actually referenced via `data-component` in a template.
       → [Component re-rendering](visual-editing-reference.md#component-re-rendering)
 - [ ] **Shared partials backed by data**: CTA, footer, navigation, and other cross-page sections are backed by data files with `@data[key]` editables.
-      → [Component editables backed by data files](visual-editing-reference.md#component-editables-backed-by-data-files)
+      → [Component editables backed by data files](../visual-editing-reference.md#component-editables-backed-by-data-files)
 - [ ] **Data file completeness**: For components backed by data files, ALL visible/configurable values are in the data file — not hardcoded in the template.
-      → [Component editables backed by data files](visual-editing-reference.md#component-editables-backed-by-data-files)
+      → [Component editables backed by data files](../visual-editing-reference.md#component-editables-backed-by-data-files)
 - [ ] **Cross-collection select wiring**: Every `select` input that references another data file (`author`, `category`, `team_member`) renders through a **registered component** that does the slug lookup _internally_, wrapped in `<editable-component data-component="..." data-prop="<slug-field>">`.
       → [Cross-collection select inputs](visual-editing-reference.md#cross-collection-select-inputs)
 - [ ] **`_inputs` presence audit:** grep `data-prop=` in every template; grep `_inputs:` in the collection config; diff the keys. Every `data-editable` region must have a matching `_inputs` entry — missing entry → visual-editor errors on entries whose frontmatter has the field populated.
 - [ ] **Schema-file seed audit:** every field the template wires must appear in `.cloudcannon/schemas/<collection>.md` default frontmatter with a sensible placeholder. Otherwise "Add new" creates pages missing half their editable regions.
 - [ ] **Markdown body content**: Pages rendering markdown body (via `<Content />`, `entry.render()`, or `<slot />` in layouts) have `data-editable="text" data-type="block" data-prop="@content"` on the wrapper element
-      → [Text editing](visual-editing-reference.md#text-editing)
+      → [Text editing](../visual-editing-reference.md#text-editing)
 - [ ] **Slot content hosts**: Editable slot content uses a concrete DOM host (`<editable-text>`, `<span>`) not `<Fragment>`
-      → [Text editing](visual-editing-reference.md#text-editing)
+      → [Text editing](../visual-editing-reference.md#text-editing)
 - [ ] **Source editables**: Hardcoded text in page templates has `data-editable="source"` with `data-path` and `data-key`.
-      → [Source editables](visual-editing-reference.md#source-editables-for-hardcoded-content)
+      → [Source editables](../visual-editing-reference.md#source-editables-for-hardcoded-content)
 - [ ] **Conditional guards**: Every `data-editable` element whose field can be undefined/null is wrapped in a conditional
-      → [Guard optional fields](visual-editing-reference.md#guard-optional-fields)
+      → [Guard optional fields](../visual-editing-reference.md#guard-optional-fields)
 - [ ] **Inline vs block text**: `data-type` matches the field's input config — block-level inputs need `data-type="block"` on a block-level host element (not `<p>`)
-      → [Text editing](visual-editing-reference.md#text-editing)
+      → [Text editing](../visual-editing-reference.md#text-editing)
 - [ ] **Component prop contract**: Registered components accept spread props matching the shape of their `data-prop` value — not a named wrapper prop
-      → [Component prop contract](visual-editing-reference.md#component-prop-contract)
+      → [Component prop contract](../visual-editing-reference.md#component-prop-contract)
 - [ ] **Cross-collection editable guard**: Shared components used for both frontmatter items and programmatic cross-collection content have an `editable` prop to conditionally strip editable attributes
-      → [Array editing](visual-editing-reference.md#array-editing)
+      → [Array editing](../visual-editing-reference.md#array-editing)
 - [ ] **`<template>` blueprints**: Primitive-only arrays that can be empty at build time have `<template>` children.
-      → [Array editing](visual-editing-reference.md#array-editing)
+      → [Array editing](../visual-editing-reference.md#array-editing)
 - [ ] **Data file input config**: Every data file in `data_config` has a `file_config` entry with proper input types and structure references
       → [configuration.md](../../cloudcannon-configuration/astro/configuration.md)
 
 ### Page builder only (skip if not applicable)
 
 - [ ] **Array wrapper attributes**: `data-component-key="_type"` alongside `data-editable="array"` and `data-prop="content_blocks"`. `data-id-key` can be omitted when it matches `data-component-key`
-      → [Page builder blocks](visual-editing-reference.md#page-builder-blocks)
+      → [Page builder blocks](../visual-editing-reference.md#page-builder-blocks)
 - [ ] **Block items**: Both `data-editable="array-item"` and `data-component={_type}` on each block element
-      → [Page builder blocks](visual-editing-reference.md#page-builder-blocks)
+      → [Page builder blocks](../visual-editing-reference.md#page-builder-blocks)
 - [ ] **Widget nested editables**: Widget components have text/image regions on their key fields
-      → [Page builder blocks](visual-editing-reference.md#page-builder-blocks)
+      → [Page builder blocks](../visual-editing-reference.md#page-builder-blocks)
 - [ ] **Sub-arrays in widgets**: Widget arrays (`items`, `actions`, `steps`) have `data-editable="array"` + `data-prop` on the container and `data-editable="array-item"` on each item
-      → [Sub-arrays within widget components](visual-editing-reference.md#sub-arrays-within-widget-components)
+      → [Sub-arrays within widget components](../visual-editing-reference.md#sub-arrays-within-widget-components)
 - [ ] **UI component variants**: All numbered variants of shared components have editable attributes
-      → [Sub-arrays within widget components](visual-editing-reference.md#sub-arrays-within-widget-components)
+      → [Sub-arrays within widget components](../visual-editing-reference.md#sub-arrays-within-widget-components)
 - [ ] **Shared component map**: `src/cloudcannon/componentMap.ts` exists and both `BlockRenderer.astro` and `registerComponents.ts` import from it
       → [Component re-rendering](visual-editing-reference.md#astro-components)
 - [ ] **Registration keys match `_type`**: Every key uses the exact `_type` string from content files
-      → [Page builder blocks](visual-editing-reference.md#page-builder-blocks)
+      → [Page builder blocks](../visual-editing-reference.md#page-builder-blocks)
 - [ ] **All block types registered**: Every `_type` value in content files has a `componentMap` entry
-      → [Page builder blocks](visual-editing-reference.md#page-builder-blocks)
+      → [Page builder blocks](../visual-editing-reference.md#page-builder-blocks)
 - [ ] **Build output verification**: `dist/` contains `data-component-key`, `data-component=`, and `data-editable="array-item"` attributes (grep to verify)
 
 ## Pre-handoff sweep
@@ -198,10 +198,10 @@ Use grep counts, not line counts (`grep -oE`, not `grep -c`), when verifying —
 
 Answer each question. Every "No" is a blocker.
 
-| Check                                                                                              | Cross-link                                                                                                                   |
-| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Every registered-component field-group nested under a single frontmatter key (no `propPrefix=""`)? | [Frontmatter co-location](visual-editing-reference.md#scattered-fields-feeding-a-registered-component--nest-the-frontmatter) |
-| Every content file backfilled after a schema default changed?                                      | [L24 — schema defaults vs backfill](visual-editing-reference.md)                                                             |
-| Every multiselect/select backed by a data file uses `values: data.*`?                              | [L3/L25 — data-backed selects](../../cloudcannon-configuration/SKILL.md#common-mistakes)                                     |
-| Every standalone-placed registered component wrapped with `<editable-component>` at the call site? | [Standalone-wrapper rule](visual-editing-reference.md#where-does-the-registration-go--component-root-or-call-site)           |
-| Every button gate uses `label?.trim() &&`, not multi-field `&&` chains?                            | [L11/L17 — button conditionals](visual-editing-reference.md)                                                                 |
+| Check                                                                                              | Cross-link                                                                                                                      |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Every registered-component field-group nested under a single frontmatter key (no `propPrefix=""`)? | [Frontmatter co-location](../visual-editing-reference.md#scattered-fields-feeding-a-registered-component--nest-the-frontmatter) |
+| Every content file backfilled after a schema default changed?                                      | [L24 — schema defaults vs backfill](../troubleshooting.md#values-that-do-not-update)                                            |
+| Every multiselect/select backed by a data file uses `values: data.*`?                              | [L3/L25 — data-backed selects](../../cloudcannon-configuration/SKILL.md#common-mistakes)                                        |
+| Every standalone-placed registered component wrapped with `<editable-component>` at the call site? | [Standalone-wrapper rule](../visual-editing-reference.md#where-does-the-registration-go--component-root-or-call-site)           |
+| Every button gate uses `label?.trim() &&`, not multi-field `&&` chains?                            | [L11/L17 — button conditionals](../visual-editing-reference.md#section-titles-and-buttons-in-child-components)                  |

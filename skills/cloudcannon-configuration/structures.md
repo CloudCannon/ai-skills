@@ -375,7 +375,7 @@ In YAML, `image:\n  src:\n  alt:` creates `{ src: null, alt: null }` — a truth
 
 When iterating, filter items that have nothing visible to render: `actions.filter((a) => a?.text || a?.icon).map(...)`.
 
-Check and update these guards during the visual-editing phase when wiring up editable regions. See [visual-editing-reference.md § Content-sourced objects and arrays are never falsy](../cloudcannon-visual-editing/astro/visual-editing-reference.md#content-sourced-objects-and-arrays-are-never-falsy) for the full pattern with code examples.
+Check and update these guards during the visual-editing phase when wiring up editable regions. See [visual-editing-reference.md § Content-sourced objects and arrays are never falsy](../cloudcannon-visual-editing/visual-editing-reference.md#content-sourced-objects-and-arrays-are-never-falsy) for the full pattern with code examples.
 
 ## Default values from components
 

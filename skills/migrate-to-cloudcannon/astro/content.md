@@ -167,7 +167,7 @@ Decide which to keep:
 - If the two fields have no semantic distinction (description is just an alias for subtitle), remove one. Use the name that best describes what the editor sees.
 - If the fallback serves a genuinely different purpose (e.g. `description` is also used for page meta/SEO), keep both but rename to make the distinction obvious: `subtitle` for the visual slot, `meta_description` for SEO. Add a `comment` on the SEO input explaining its purpose.
 
-The goal: every field in the data panel corresponds to exactly one thing on the page, and every inline editable's `data-prop` points to a field that exists in the structure. See [visual-editing-reference.md § Data-prop mismatch](../../cloudcannon-visual-editing/astro/visual-editing-reference.md#page-builder-blocks) for the related visual editing guidance when a shared component renames the prop.
+The goal: every field in the data panel corresponds to exactly one thing on the page, and every inline editable's `data-prop` points to a field that exists in the structure. See [visual-editing-reference.md § Data-prop mismatch](../../cloudcannon-visual-editing/visual-editing-reference.md#page-builder-blocks) for the related visual editing guidance when a shared component renames the prop.
 
 ### Resolving optimized image paths from frontmatter
 

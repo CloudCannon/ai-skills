@@ -75,7 +75,7 @@ Every site has most of these. For each row, the default treatment is non-negotia
 
 ### Footer
 
-Use simple `{heading, links[]}` arrays for columns. Tip text, credits, and image credits go in the same file. Use `@data[footer]` editables in the component. the columns array editable wraps **only the mapped columns** — static siblings (logo, tagline) sit _outside_ the `data-editable="array"` wrapper. Wrap with `class="contents"` so the array container stays layout-neutral and the surrounding grid still flows. Child editables inside each `data-editable="array-item"` use **relative paths** (`data-prop="heading"`, `data-prop="links"`, `data-prop="label"`) — never the indexed form `data-prop="@data[footer].columns[N].heading"`. See [visual-editing-reference.md § Arrays inside data files](../../cloudcannon-visual-editing/astro/visual-editing-reference.md#arrays-inside-data-files).
+Use simple `{heading, links[]}` arrays for columns. Tip text, credits, and image credits go in the same file. Use `@data[footer]` editables in the component. the columns array editable wraps **only the mapped columns** — static siblings (logo, tagline) sit _outside_ the `data-editable="array"` wrapper. Wrap with `class="contents"` so the array container stays layout-neutral and the surrounding grid still flows. Child editables inside each `data-editable="array-item"` use **relative paths** (`data-prop="heading"`, `data-prop="links"`, `data-prop="label"`) — never the indexed form `data-prop="@data[footer].columns[N].heading"`. See [visual-editing-reference.md § Arrays inside data files](../../cloudcannon-visual-editing/visual-editing-reference.md#arrays-inside-data-files).
 
 ### CTA
 
